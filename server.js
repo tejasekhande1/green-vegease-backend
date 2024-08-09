@@ -9,7 +9,7 @@ app.use(express.json());
 app.get("/", async (req, res) => {
     return res.status(200).json({
         success: true,
-        message: "Server Starts"
+        message: `Server starts at ${PORT}`
     })
 })
 
