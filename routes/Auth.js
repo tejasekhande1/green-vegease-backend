@@ -1,14 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-const {signUp} = require('../controllers/Auth');
+const {signUp, login} = require('../controllers/Auth');
 
 router.post("/signup", signUp);
 
-router.post("/login", async (req, res) => {
-    res.json({
-        message: "login route accessible"
-    });
-})
+router.post("/login", login);
 
 module.exports = router;
