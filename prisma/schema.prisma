@@ -1,0 +1,21 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// SQLite doesn’t support enums directly (for : role)
+model User {
+  id              Int     @id @default(autoincrement())
+  first_name      String
+  last_name       String
+  username        String  @unique
+  mobile_number   String  @unique
+  email           String  @unique
+  password        String
+  profile_picture String?
+  role            String @default("user")
+}
