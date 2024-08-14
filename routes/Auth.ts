@@ -1,11 +1,8 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
-const Auth_1 = require("../controllers/Auth");
-const router = express_1.default.Router();
+import express, {Request, Response} from 'express';
+import {signUp, login} from '../controllers/Auth';
+
+const router = express.Router();
+
 /**
  * @swagger
  * /api/v1/auth/signup:
@@ -43,7 +40,8 @@ const router = express_1.default.Router();
  *       500:
  *         description: Internal server error
  */
-router.post("/signup", (req, res) => (0, Auth_1.signUp)(req, res));
+router.post("/signup", (req: Request, res: Response) => signUp(req, res));
+
 /**
  * @swagger
  * /api/v1/auth/login:
@@ -78,5 +76,6 @@ router.post("/signup", (req, res) => (0, Auth_1.signUp)(req, res));
  *       500:
  *         description: Internal server error
  */
-router.post("/login", (req, res) => (0, Auth_1.login)(req, res));
-exports.default = router;
+router.post("/login", (req: Request, res: Response) => login(req, res));
+
+export default router;
