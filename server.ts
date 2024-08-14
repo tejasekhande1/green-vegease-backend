@@ -1,9 +1,9 @@
-import express = require('express');
+import express, {Request, Response} from "express";
 import cookieParser = require('cookie-parser');
 import swaggerUi = require('swagger-ui-express');
 import dotenv = require('dotenv');
 import authRoutes from './routes/Auth';
-// import swaggerSpec from './config/swagger';
+import swaggerSpec from './config/swagger';
 import db from './config/database';
 
 dotenv.config();
@@ -16,11 +16,11 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Swagger Documentation
-/*app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get('/docs.json', (req: Request, res: Response) => {
     res.setHeader('Content-Type', 'application/json');
     res.send(swaggerSpec);
-});*/
+});
 
 // Routes
 app.use("/api/v1/auth", authRoutes);
