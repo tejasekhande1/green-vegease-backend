@@ -1,12 +1,8 @@
 import express, {Request, Response} from "express";
-import cookieParser = require('cookie-parser');
-import swaggerUi = require('swagger-ui-express');
-import dotenv = require('dotenv');
+import cookieParser from "cookie-parser";
+import swaggerUi from "swagger-ui-express";
 import authRoutes from './routes/Auth';
 import swaggerSpec from './config/swagger';
-import db from './config/database';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
