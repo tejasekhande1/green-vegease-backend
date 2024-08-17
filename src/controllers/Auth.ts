@@ -1,9 +1,10 @@
-import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import { Request, Response } from "express";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { and, eq } from "drizzle-orm";
 
-const prisma = new PrismaClient();
+import db from "../config/database";
+import { userTable } from "@/schema/user";
 
 export const signUp = async (req: Request, res: Response): Promise<Response> => {
     try {
@@ -11,44 +12,46 @@ export const signUp = async (req: Request, res: Response): Promise<Response> => 
 
         if (!firstname || !lastname || !username || !mobileNumber || !email || !password || !confirmedPassword) {
             return res.status(400).json({
-                success: false, message: 'All fields are required',
+                success: false, message: "All fields are required",
             });
         }
 
         if (password !== confirmedPassword) {
             return res.status(400).json({
-                success: false, message: 'Passwords do not match, please try again',
+                success: false, message: "Passwords do not match, please try again",
             });
         }
 
-        const existingUser = await prisma.user.findFirst({
-            where: {
-                OR: [{ email }, { mobile_number: mobileNumber }]
-            }
-        });
+        const existingUser = await db
+            .select({
+                email: userTable.email,
+                mobileNumber: userTable.mobileNumber,
+            })
+            .from(userTable)
+            .where(and(eq(userTable.email, email), eq(userTable.mobileNumber, mobileNumber)));
 
         if (existingUser) {
             return res.status(400).json({
-                success: false, message: 'User already exists',
+                success: false, message: "User already exists",
             });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = await prisma.user.create({
-            data: {
-                first_name: firstname,
-                last_name: lastname,
-                username,
-                mobile_number: mobileNumber,
-                email,
+        const user = await db
+            .insert(userTable)
+            .values({
+                email: email,
                 password: hashedPassword,
-                profile_picture: `https://api.dicebear.com/7.x/initials/svg?seed=${firstname} ${lastname}`,
-            },
-        });
+                username: username,
+                firstName: firstname,
+                lastName: lastname,
+                mobileNumber: mobileNumber,
+                profilePicture: `https://api.dicebear.com/7.x/initials/svg?seed=${firstname} ${lastname}`,
+            });
 
         return res.status(201).json({
-            success: true, message: 'User registered successfully', user: {
+            success: true, message: "User registered successfully", user: {
                 id: user.id,
                 first_name: user.first_name,
                 last_name: user.last_name,
@@ -59,7 +62,7 @@ export const signUp = async (req: Request, res: Response): Promise<Response> => 
         });
     } catch (error) {
         return res.status(500).json({
-            success: false, message: 'Error while registering user', error: (error as Error).message,
+            success: false, message: "Error while registering user", error: (error as Error).message,
         });
     }
 };
@@ -71,18 +74,27 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
         if (!mobileNumber || !password) {
             return res.status(400).json({
                 success: false,
-                message: 'Both mobile number and password are required.',
+                message: "Both mobile number and password are required.",
             });
         }
 
-        const user = await prisma.user.findUnique({
-            where: { mobile_number: mobileNumber },
-        });
+        const user = await db
+            .select({
+                email: userTable.email,
+                username: userTable.username,
+                firstName: userTable.firstName,
+                lastName: userTable.lastName,
+                mobileNumber: userTable.mobileNumber,
+                role: userTable.role,
+                profilePicture: userTable.profilePicture,
+            })
+            .from(userTable)
+            .where(eq(userTable.mobileNumber, mobileNumber));
 
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: 'User not found.',
+                message: "User not found.",
             });
         }
 
@@ -91,7 +103,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
         if (!isPasswordValid) {
             return res.status(401).json({
                 success: false,
-                message: 'Invalid password.',
+                message: "Invalid password.",
             });
         }
 
@@ -102,7 +114,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
         };
 
         const token = jwt.sign(payload, process.env.SECRET_KEY as string, {
-            expiresIn: '2h',
+            expiresIn: "2h",
         });
 
         const userResponse = { ...user, password: undefined, token };
@@ -110,22 +122,22 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
         const cookieOptions = {
             expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: process.env.NODE_ENV === "production",
         };
 
         return res
-            .cookie('token', token, cookieOptions)
+            .cookie("token", token, cookieOptions)
             .status(200)
             .json({
                 success: true,
                 token,
                 user: userResponse,
-                message: 'User logged in successfully.',
+                message: "User logged in successfully.",
             });
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: 'Error while logging in user.',
+            message: "Error while logging in user.",
             error: (error as Error).message,
         });
     }

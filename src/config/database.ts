@@ -1,15 +1,19 @@
-import sqlite3 from 'sqlite3';
+import { drizzle, PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 
-const DB_PATH = process.env.DB_PATH || ':memory:';
+const { POSTGRES_HOST, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_PORT } = process.env;
 
-console.log(DB_PATH);
+if (
+    !POSTGRES_HOST ||
+    !POSTGRES_DB ||
+    !POSTGRES_USER ||
+    !POSTGRES_PASSWORD ||
+    !POSTGRES_PORT
+) {
+    throw new Error("Missing postgres environment variables");
+}
 
-let db = new sqlite3.Database(DB_PATH, (err: Error | null) => {
-    if (err) {
-        console.error(err.message);
-        return;
-    }
-    console.log('Connected to the SQLite database.');
-});
+const queryClient = postgres(`postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}`);
+const db:  PostgresJsDatabase = drizzle(queryClient);
 
 export default db;

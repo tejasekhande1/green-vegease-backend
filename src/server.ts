@@ -5,7 +5,7 @@ import authRoutes from './routes/Auth';
 import swaggerSpec from './config/swagger';
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 8000;
 
 // Middleware
 app.use(express.json());
