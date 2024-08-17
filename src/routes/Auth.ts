@@ -40,7 +40,7 @@ const router = express.Router();
  *       500:
  *         description: Internal server error
  */
-router.post("/signup", (req: Request, res: Response) => signUp(req, res));
+router.post("/signup", signUp);
 
 /**
  * @swagger
@@ -76,6 +76,6 @@ router.post("/signup", (req: Request, res: Response) => signUp(req, res));
  *       500:
  *         description: Internal server error
  */
-router.post("/login", (req: Request, res: Response) => login(req, res));
+router.post("/login", login);
 
 export default router;

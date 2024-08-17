@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { and, eq } from "drizzle-orm";
 
 import db from "../config/database";
-import { userTable } from "@/schema/user";
+import { insertUser, userTable } from "../schema/user";
 
 export const signUp = async (req: Request, res: Response): Promise<Response> => {
     try {
@@ -38,26 +38,23 @@ export const signUp = async (req: Request, res: Response): Promise<Response> => 
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = await db
-            .insert(userTable)
-            .values({
-                email: email,
-                password: hashedPassword,
-                username: username,
-                firstName: firstname,
-                lastName: lastname,
-                mobileNumber: mobileNumber,
-                profilePicture: `https://api.dicebear.com/7.x/initials/svg?seed=${firstname} ${lastname}`,
-            });
+        const user = await insertUser({
+            email: email,
+            password: hashedPassword,
+            username: username,
+            firstName: firstname,
+            lastName: lastname,
+            mobileNumber: mobileNumber,
+            profilePicture: `https://api.dicebear.com/7.x/initials/svg?seed=${firstname} ${lastname}`,
+        });
 
         return res.status(201).json({
             success: true, message: "User registered successfully", user: {
-                id: user.id,
-                first_name: user.first_name,
-                last_name: user.last_name,
-                email: user.email,
-                mobile_number: user.mobile_number,
-                profile_picture: user.profile_picture,
+                first_name: user[0].firstName,
+                last_name: user[0].lastName,
+                email: user[0].email,
+                mobile_number: user[0].mobileNumber,
+                profile_picture: user[0].profilePicture,
             },
         });
     } catch (error) {
@@ -78,9 +75,11 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
             });
         }
 
-        const user = await db
+        const filteredUsers = await db
             .select({
+                id: userTable.id,
                 email: userTable.email,
+                password: userTable.password,
                 username: userTable.username,
                 firstName: userTable.firstName,
                 lastName: userTable.lastName,
@@ -89,16 +88,17 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
                 profilePicture: userTable.profilePicture,
             })
             .from(userTable)
-            .where(eq(userTable.mobileNumber, mobileNumber));
+            .where(eq(userTable.mobileNumber, mobileNumber))
+            .limit(1);
 
-        if (!user) {
+        if (filteredUsers.length === 0) {
             return res.status(404).json({
                 success: false,
                 message: "User not found.",
             });
         }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await bcrypt.compare(password, filteredUsers[0].password);
 
         if (!isPasswordValid) {
             return res.status(401).json({
@@ -108,16 +108,16 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
         }
 
         const payload = {
-            id: user.id,
-            email: user.email,
-            role: user.role,
+            id: filteredUsers[0].id,
+            email: filteredUsers[0].email,
+            role: filteredUsers[0].role,
         };
 
         const token = jwt.sign(payload, process.env.SECRET_KEY as string, {
             expiresIn: "2h",
         });
 
-        const userResponse = { ...user, password: undefined, token };
+        const userResponse = { ...filteredUsers[0], password: undefined, token };
 
         const cookieOptions = {
             expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
