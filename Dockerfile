@@ -13,6 +13,9 @@ RUN npm install
 # Install TypeScript and ts-node globally for development convenience
 RUN npm install -g typescript ts-node
 
+# Install nodemon as a development dependency
+RUN npm install -g -D nodemon
+
 # Copy the rest of the application code
 COPY . .
 

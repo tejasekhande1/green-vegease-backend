@@ -1,19 +1,23 @@
 services:
   backend:
     build: .
+    container_name: gv_backend
     ports:
       - "8000:8000"
-    environment:
-      - NODE_ENV=development
+    env_file:
+      - .env
     command: npm run dev
-    develop:
-      watch:
-        - path: ./src
-          target: /usr/src/app/src
-          action: sync
-        - path: ./package.json
-          target: /usr/src/app/package.json
-          action: sync
+    volumes:
+      - .:/usr/src/app
+  db:
+    image: postgres:16-alpine3.20
+    container_name: gv_db
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - db_data:/var/lib/postgresql/data
 
 volumes:
-  node_modules:
+  db_data:
