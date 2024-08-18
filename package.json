@@ -4,7 +4,8 @@
     "start": "node dist/server.js",
     "dev": "nodemon --watch src -e ts --exec ts-node src/server.ts",
     "generate": "drizzle-kit generate",
-    "migrate": "drizzle-kit migrate"
+    "migrate": "drizzle-kit migrate",
+    "drizzle-studio": "npx drizzle-kit studio --host 0.0.0.0 --port 3000 --verbose"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

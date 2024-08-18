@@ -28,9 +28,9 @@ export const signUp = async (req: Request, res: Response): Promise<Response> => 
                 mobileNumber: userTable.mobileNumber,
             })
             .from(userTable)
-            .where(and(eq(userTable.email, email), eq(userTable.mobileNumber, mobileNumber)));
+            .where(and(eq(userTable.email, email), eq(userTable.mobileNumber, mobileNumber)))
 
-        if (existingUser) {
+        if (existingUser.length !== 0) {
             return res.status(400).json({
                 success: false, message: "User already exists",
             });
