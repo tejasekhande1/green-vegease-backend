@@ -4,21 +4,48 @@ import jwt from "jsonwebtoken";
 import { and, eq } from "drizzle-orm";
 
 import db from "../config/database";
-import { insertUser, userTable } from "../schema/user";
+import { insertUser, userTable } from "../schema/Auth";
+import {
+    generateVerificationToken,
+    sendEmail,
+} from "../library/EmailVerification";
+import { config } from "../config/config";
+import Logging from "../library/Logging";
 
-export const signUp = async (req: Request, res: Response): Promise<Response> => {
+export const signUp = async (
+    req: Request,
+    res: Response,
+): Promise<Response> => {
     try {
-        const { firstname, lastname, username, mobileNumber, email, password, confirmedPassword } = req.body;
+        const {
+            firstname,
+            lastname,
+            username,
+            mobileNumber,
+            email,
+            password,
+            confirmedPassword,
+        } = req.body;
 
-        if (!firstname || !lastname || !username || !mobileNumber || !email || !password || !confirmedPassword) {
+        if (
+            !firstname ||
+            !lastname ||
+            !username ||
+            !mobileNumber ||
+            !email ||
+            !password ||
+            !confirmedPassword
+        ) {
             return res.status(400).json({
-                success: false, message: "All fields are required",
+                success: false,
+                message: "All fields are required",
             });
         }
 
         if (password !== confirmedPassword) {
             return res.status(400).json({
-                success: false, message: "Passwords do not match, please try again",
+                success: false,
+                message: "Passwords do not match, please try again",
             });
         }
 
@@ -28,11 +55,17 @@ export const signUp = async (req: Request, res: Response): Promise<Response> => 
                 mobileNumber: userTable.mobileNumber,
             })
             .from(userTable)
-            .where(and(eq(userTable.email, email), eq(userTable.mobileNumber, mobileNumber)))
+            .where(
+                and(
+                    eq(userTable.email, email),
+                    eq(userTable.mobileNumber, mobileNumber),
+                ),
+            );
 
         if (existingUser.length !== 0) {
             return res.status(400).json({
-                success: false, message: "User already exists",
+                success: false,
+                message: "User already exists",
             });
         }
 
@@ -49,7 +82,9 @@ export const signUp = async (req: Request, res: Response): Promise<Response> => 
         });
 
         return res.status(201).json({
-            success: true, message: "User registered successfully", user: {
+            success: true,
+            message: "User registered successfully",
+            user: {
                 first_name: user[0].firstName,
                 last_name: user[0].lastName,
                 email: user[0].email,
@@ -59,7 +94,9 @@ export const signUp = async (req: Request, res: Response): Promise<Response> => 
         });
     } catch (error) {
         return res.status(500).json({
-            success: false, message: "Error while registering user", error: (error as Error).message,
+            success: false,
+            message: "Error while registering user",
+            error: (error as Error).message,
         });
     }
 };
@@ -98,7 +135,10 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
             });
         }
 
-        const isPasswordValid = await bcrypt.compare(password, filteredUsers[0].password);
+        const isPasswordValid = await bcrypt.compare(
+            password,
+            filteredUsers[0].password,
+        );
 
         if (!isPasswordValid) {
             return res.status(401).json({
@@ -117,7 +157,11 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
             expiresIn: "2h",
         });
 
-        const userResponse = { ...filteredUsers[0], password: undefined, token };
+        const userResponse = {
+            ...filteredUsers[0],
+            password: undefined,
+            token,
+        };
 
         const cookieOptions = {
             expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
@@ -125,15 +169,12 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
             secure: process.env.NODE_ENV === "production",
         };
 
-        return res
-            .cookie("token", token, cookieOptions)
-            .status(200)
-            .json({
-                success: true,
-                token,
-                user: userResponse,
-                message: "User logged in successfully.",
-            });
+        return res.cookie("token", token, cookieOptions).status(200).json({
+            success: true,
+            token,
+            user: userResponse,
+            message: "User logged in successfully.",
+        });
     } catch (error) {
         return res.status(500).json({
             success: false,
@@ -141,4 +182,46 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
             error: (error as Error).message,
         });
     }
+};
+
+export const sendVerificationEmail = async (req: Request, res: Response) => {
+    const { sender, verificationTemplateId: templateId } = config.sendgrid;
+
+    if (!sender || !templateId) {
+        return res.status(500).json({
+            message: "Email not sent",
+            error: "Email sender or template ID not found",
+        });
+    }
+
+    const { email: recipient } = req.body;
+    const token = generateVerificationToken();
+    const dynamicData = {
+        token: token,
+        validity_minutes: 5,
+    };
+    const mailOptions = {
+        to: recipient,
+        from: process.env.SENDGRID_SENDER_EMAIL as string,
+        templateId: process.env
+            .SENDGRID_EMAIL_VERIFICATION_TEMPLATE_ID as string,
+        dynamic_template_data: dynamicData,
+    };
+
+    try {
+        Logging.info(`Sending verification email to ${recipient}`);
+        await sendEmail(mailOptions);
+        Logging.info(`Verification email sent to ${recipient}`);
+    } catch (error) {
+        return res.status(500).json({
+            message: "Email not sent",
+            error: "Problem at third party email service",
+        });
+    }
+
+    return res.status(200).json({
+        message: "Email sent successfully",
+        receiver_email: recipient,
+        sender_email: process.env.SENDGRID_SENDER_EMAIL,
+    });
 };

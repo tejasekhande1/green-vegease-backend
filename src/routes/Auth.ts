@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
-import { signUp, login } from "../controllers/Auth";
+import { signUp, login, sendVerificationEmail } from "../controllers/Auth";
+import { RequestSchemas, ValidateZod } from "../validation/utils";
 
 const router = express.Router();
 
@@ -77,5 +78,8 @@ router.post("/signup", signUp);
  *         description: Internal server error
  */
 router.post("/login", login);
+
+// TODO: Add swagger documentation
+router.post("/send-verification-email", ValidateZod(RequestSchemas.auth.sendVerificationEmail), sendVerificationEmail);
 
 export default router;

@@ -1,35 +1,90 @@
-import express, {Request, Response} from "express";
+import express, { Request, Response } from "express";
+import http from "http";
 import cookieParser from "cookie-parser";
 import swaggerUi from "swagger-ui-express";
-import authRoutes from './routes/Auth';
-import swaggerSpec from './config/swagger';
+
+import authRoutes from "./routes/Auth";
+import swaggerSpec from "./config/swagger";
+import Logging from "./library/Logging";
+import { config } from "./config/config";
 
 const app = express();
-const PORT = process.env.PORT || 8000;
 
-// Middleware
-app.use(express.json());
-app.use(cookieParser());
+const startServer = () => {
+    // log the request
+    app.use((req, res, next) => {
+        // log the request
+        Logging.info(
+            `Incomming - METHOD [${req.method}] - URL: [${req.url}] - IP: [${req.socket.remoteAddress}]`,
+        );
 
-// Swagger Documentation
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-app.get('/docs.json', (req: Request, res: Response) => {
-    res.setHeader('Content-Type', 'application/json');
-    res.send(swaggerSpec);
-});
+        res.on("finish", () => {
+            // log the res
+            Logging.info(
+                `Result - METHOD: [${req.method}] - URL: [${req.url}] - IP: [${req.socket.remoteAddress}] - STATUS: [${res.statusCode}]`,
+            );
+        });
 
-// Routes
-app.use("/api/v1/auth", authRoutes);
-
-// Error Handling Middleware
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error(err.stack);
-    res.status(500).send({
-        success: false,
-        message: "Internal Server Error"
+        next();
     });
-});
 
-app.listen(PORT, () => {
-    console.log("Server Listening at ", PORT);
-});
+    app.use(express.urlencoded({ extended: true }));
+    app.use(express.json());
+    app.use(cookieParser());
+
+    // rules of our API
+    app.use((req, res, next) => {
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header(
+            "Access-Control-Allow-Headers",
+            "Origin, X-Requested-With, Content-Type, Accept, Authorization",
+        );
+
+        if (req.method == "OPTIONS") {
+            res.header(
+                "Access-Control-Allow-Methods",
+                "PUT, POST, PATCH, DELETE, GET",
+            );
+            return res.status(200).json({});
+        }
+
+        next();
+    });
+
+    // Swagger Documentation
+    app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+    app.get("/docs.json", (req: Request, res: Response) => {
+        res.setHeader("Content-Type", "application/json");
+        res.send(swaggerSpec);
+    });
+
+    // Routes
+    app.use("/api/v1/auth", authRoutes);
+
+    // healthcheck
+    app.get("/ping", (req, res, next) =>
+        res.status(200).json({ hello: "world" }),
+    );
+
+    // Error Handling Middleware
+    app.use(
+        (
+            err: Error,
+            req: express.Request,
+            res: express.Response,
+            next: express.NextFunction,
+        ) => {
+            console.error(err.stack);
+            res.status(500).send({
+                success: false,
+                message: "Internal Server Error",
+            });
+        },
+    );
+
+    http.createServer(app).listen(config.server.port, () =>
+        Logging.info(`Server is running on port ${config.server.port}`),
+    );
+};
+
+startServer();
