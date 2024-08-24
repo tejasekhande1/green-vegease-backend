@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import http from "http";
 import cookieParser from "cookie-parser";
 import swaggerUi from "swagger-ui-express";
@@ -12,7 +12,7 @@ const app = express();
 
 const startServer = () => {
     // log the request
-    app.use((req, res, next) => {
+    app.use((req: Request, res: Response, next: NextFunction) => {
         // log the request
         Logging.info(
             `Incomming - METHOD [${req.method}] - URL: [${req.url}] - IP: [${req.socket.remoteAddress}]`,
@@ -33,7 +33,7 @@ const startServer = () => {
     app.use(cookieParser());
 
     // rules of our API
-    app.use((req, res, next) => {
+    app.use((req: Request, res: Response, next: NextFunction) => {
         res.header("Access-Control-Allow-Origin", "*");
         res.header(
             "Access-Control-Allow-Headers",
@@ -62,7 +62,7 @@ const startServer = () => {
     app.use("/api/v1/auth", authRoutes);
 
     // healthcheck
-    app.get("/ping", (req, res, next) =>
+    app.get("/ping", (req: Request, res: Response, next: NextFunction) =>
         res.status(200).json({ hello: "world" }),
     );
 
@@ -74,7 +74,7 @@ const startServer = () => {
             res: express.Response,
             next: express.NextFunction,
         ) => {
-            console.error(err.stack);
+            Logging.error(err.stack);
             res.status(500).send({
                 success: false,
                 message: "Internal Server Error",
