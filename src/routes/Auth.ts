@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { signUp, login, sendVerificationEmail } from "../controllers/Auth";
+import { signUp, login, sendVerificationEmail, resetPassword } from "../controllers/Auth";
 import { RequestSchemas, ValidateZod } from "../validation/utils";
 
 const router = express.Router();
@@ -81,5 +81,8 @@ router.post("/login", ValidateZod(RequestSchemas.auth.login), login);
 
 // TODO: Add swagger documentation
 router.post("/send-verification-email", ValidateZod(RequestSchemas.auth.sendVerificationEmail), sendVerificationEmail);
+
+// TODO: Add swagger documentation
+router.patch('/reset-password', ValidateZod(RequestSchemas.auth.resetPassword), resetPassword);
 
 export default router;

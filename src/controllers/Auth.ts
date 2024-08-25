@@ -205,3 +205,58 @@ export const sendVerificationEmail = async (req: Request, res: Response) => {
         sender_email: process.env.SENDGRID_SENDER_EMAIL,
     });
 };
+
+export const resetPassword = async (req: Request, res: Response) => {
+    const { email, oldPassword, newPassword, confirmedNewPassword } = req.body;
+
+    try {
+        const [user] = await db
+            .select({
+                email: userTable.email,
+                password: userTable.password,
+            })
+            .from(userTable)
+            .where(eq(userTable.email, email))
+            .limit(1);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found.",
+            });
+        }
+
+        const isOldPasswordMatched = await bcrypt.compare(oldPassword, user.password);
+        if (!isOldPasswordMatched) {
+            return res.status(401).json({
+                success: false,
+                message: "Please enter correct old password.",
+            });
+        }
+
+        if (newPassword !== confirmedNewPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "New password and confirmed password do not match.",
+            });
+        }
+
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+        await db
+            .update(userTable)
+            .set({ password: hashedNewPassword })
+            .where(eq(userTable.email, email));
+    } catch (error) {
+        console.error("Error resetting password:", error);
+        return res.status(500).json({
+            success: false,
+            message: "An error occurred while resetting the password.",
+        });
+    }
+
+    return res.status(200).json({
+        success: true,
+        message: "Password reset successfully.",
+    });
+};

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { resetPassword } from "../controllers/Auth";
 
 export const AuthRequestSchemas = {
     signUp: z.object({
@@ -41,4 +42,22 @@ export const AuthRequestSchemas = {
             invalid_type_error: "email must be a string."
         }).email("Invalid email format.")
     }),
+    resetPassword: z.object({
+        email: z.string({
+            required_error: "email is required.",
+            invalid_type_error: "email must be a string."
+        }).email("Invalid email format."),
+        oldPassword: z.string({
+            required_error: "oldPassword is required.",
+            invalid_type_error: "oldPassword must be a string."
+        }),
+        newPassword: z.string({
+            required_error: "newPassword is required.",
+            invalid_type_error: "newPassword must be a string."
+        }),
+        confirmedNewPassword: z.string({
+            required_error: "confirmedNewPassword is required.",
+            invalid_type_error: "confirmedNewPassword must be a string."
+        }),
+    })
 };
