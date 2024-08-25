@@ -79,7 +79,35 @@ router.post("/signup", signUp);
  */
 router.post("/login", login);
 
-// TODO: Add swagger documentation
+/**
+ * @swagger
+ * /api/v1/auth/send-verification-email:
+ *   post:
+ *     summary: Send verification email
+ *     description: Send a verification email to the user.
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Verification email sent successfully
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
 router.post("/send-verification-email", ValidateZod(RequestSchemas.auth.sendVerificationEmail), sendVerificationEmail);
 
 export default router;
