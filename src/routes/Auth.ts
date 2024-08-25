@@ -83,6 +83,6 @@ router.post("/login", ValidateZod(RequestSchemas.auth.login), login);
 router.post("/send-verification-email", ValidateZod(RequestSchemas.auth.sendVerificationEmail), sendVerificationEmail);
 
 // TODO: Add swagger documentation
-router.put('/reset-password', ValidateZod(RequestSchemas.auth.resetPassword), resetPassword);
+router.patch('/reset-password', ValidateZod(RequestSchemas.auth.resetPassword), resetPassword);
 
 export default router;
