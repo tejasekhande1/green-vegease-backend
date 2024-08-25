@@ -11,8 +11,8 @@ export const AuthRequestSchemas = {
         confirmedPassword: z.string(),
     }),
     login: z.object({
-        mobileNumber: z.string(),
-        password: z.string(),
+        mobileNumber: z.string({required_error:"Mobile Number is required"}),
+        password: z.string({required_error:"Password is required"}),
     }),
     sendVerificationEmail: z.object({
         email: z.string().email(),

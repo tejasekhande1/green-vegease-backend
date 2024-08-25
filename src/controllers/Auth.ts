@@ -11,6 +11,8 @@ import {
 } from "../library/EmailVerification";
 import { config } from "../config/config";
 import Logging from "../library/Logging";
+import { AuthRequestSchemas } from "../validation/Auth";
+import { z, ZodError } from "zod";
 
 export const signUp = async (
     req: Request,
@@ -103,8 +105,7 @@ export const signUp = async (
 
 export const login = async (req: Request, res: Response): Promise<Response> => {
     try {
-        const { mobileNumber, password } = req.body;
-
+        const { mobileNumber, password } = AuthRequestSchemas.login.parse(req.body)
         if (!mobileNumber || !password) {
             return res.status(400).json({
                 success: false,
@@ -176,10 +177,18 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
             message: "User logged in successfully.",
         });
     } catch (error) {
+        if (error instanceof z.ZodError) {
+            const errorMessages = error.errors.map((err) => err.message);
+            return res.status(400).json({
+                success: false,
+                message: errorMessages.join(", "),
+            });
+        }
+
         return res.status(500).json({
             success: false,
             message: "Error while logging in user.",
-            error: (error as Error).message,
+            error: error,
         });
     }
 };
