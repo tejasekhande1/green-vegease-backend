@@ -41,7 +41,7 @@ const router = express.Router();
  *       500:
  *         description: Internal server error
  */
-router.post("/signup", signUp);
+router.post("/signup", ValidateZod(RequestSchemas.auth.signUp),signUp);
 
 /**
  * @swagger
@@ -77,7 +77,7 @@ router.post("/signup", signUp);
  *       500:
  *         description: Internal server error
  */
-router.post("/login", login);
+router.post("/login", ValidateZod(RequestSchemas.auth.login),login);
 
 // TODO: Add swagger documentation
 router.post("/send-verification-email", ValidateZod(RequestSchemas.auth.sendVerificationEmail), sendVerificationEmail);

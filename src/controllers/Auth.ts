@@ -27,7 +27,7 @@ export const signUp = async (
             email,
             password,
             confirmedPassword,
-        } = AuthRequestSchemas.signUp.parse(req.body);
+        } = req.body;
 
         if (password !== confirmedPassword) {
             return res.status(400).json({
@@ -80,14 +80,6 @@ export const signUp = async (
             },
         });
     } catch (error) {
-        if (error instanceof z.ZodError) {
-            const errorMessages = error.errors.map((err) => err.message);
-            return res.status(400).json({
-                success: false,
-                message: errorMessages.join(", "),
-            });
-        }
-
         return res.status(500).json({
             success: false,
             message: "Error while registering user",
@@ -98,7 +90,7 @@ export const signUp = async (
 
 export const login = async (req: Request, res: Response): Promise<Response> => {
     try {
-        const { mobileNumber, password } = AuthRequestSchemas.login.parse(req.body)
+        const { mobileNumber, password } = req.body;
 
         const filteredUsers = await db
             .select({
@@ -164,14 +156,6 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
             message: "User logged in successfully.",
         });
     } catch (error) {
-        if (error instanceof z.ZodError) {
-            const errorMessages = error.errors.map((err) => err.message);
-            return res.status(400).json({
-                success: false,
-                message: errorMessages.join(", "),
-            });
-        }
-
         return res.status(500).json({
             success: false,
             message: "Error while logging in user.",
