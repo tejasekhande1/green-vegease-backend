@@ -11,6 +11,8 @@ import {
 } from "../library/EmailVerification";
 import { config } from "../config/config";
 import Logging from "../library/Logging";
+import { AuthRequestSchemas } from "../validation/Auth";
+import { z, ZodError } from "zod";
 
 export const signUp = async (
     req: Request,
@@ -26,21 +28,6 @@ export const signUp = async (
             password,
             confirmedPassword,
         } = req.body;
-
-        if (
-            !firstname ||
-            !lastname ||
-            !username ||
-            !mobileNumber ||
-            !email ||
-            !password ||
-            !confirmedPassword
-        ) {
-            return res.status(400).json({
-                success: false,
-                message: "All fields are required",
-            });
-        }
 
         if (password !== confirmedPassword) {
             return res.status(400).json({
@@ -81,7 +68,7 @@ export const signUp = async (
             profilePicture: `https://api.dicebear.com/7.x/initials/svg?seed=${firstname} ${lastname}`,
         });
 
-        return res.status(201).json({
+        return res.status(200).json({
             success: true,
             message: "User registered successfully",
             user: {
@@ -104,13 +91,6 @@ export const signUp = async (
 export const login = async (req: Request, res: Response): Promise<Response> => {
     try {
         const { mobileNumber, password } = req.body;
-
-        if (!mobileNumber || !password) {
-            return res.status(400).json({
-                success: false,
-                message: "Both mobile number and password are required.",
-            });
-        }
 
         const filteredUsers = await db
             .select({

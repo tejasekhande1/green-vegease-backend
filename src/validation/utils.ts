@@ -1,4 +1,4 @@
-import { ZodObject } from "zod";
+import { ZodObject, ZodError } from "zod";
 import { NextFunction, Request, Response } from "express";
 import Logging from "../library/Logging";
 import { AuthRequestSchemas } from "./Auth";
@@ -9,14 +9,24 @@ const ValidateZod = (schema: ZodObject<any>) => {
             schema.parse(req.body);
             next();
         } catch (error: any) {
-            Logging.error(error);
-            return res.status(422).json({ error: error.errors });
+            if (error instanceof ZodError) {
+                const errorMessages = error.errors.map((err) => err.message);
+                return res.status(422).json({
+                    success: false,
+                    message: errorMessages.join(", "),
+                });
+            } else {
+                return res.status(500).json({
+                    success: false,
+                    message: "Internal server error",
+                });
+            }
         }
     };
 };
 
 const RequestSchemas = {
     auth: AuthRequestSchemas,
-}
+};
 
-export {ValidateZod, RequestSchemas};
+export { ValidateZod, RequestSchemas };
