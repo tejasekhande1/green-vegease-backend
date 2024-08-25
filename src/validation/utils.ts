@@ -8,7 +8,7 @@ const ValidateZod = (schema: ZodObject<any>) => {
         try {
             schema.parse(req.body);
             next();
-        } catch (error:any) {
+        } catch (error: any) {
             if (error instanceof ZodError) {
                 const errorMessages = error.errors.map((err) => err.message);
                 return res.status(422).json({
