@@ -22,5 +22,10 @@ COPY . .
 # Expose the port the app runs on
 EXPOSE 8000
 
+#Migrate DB
+COPY entrypoint.sh /usr/local/bin/entrypoint
+RUN chmod +x /usr/local/bin/entrypoint
+ENTRYPOINT [ "entrypoint" ]
+
 # Command to run the application in development mode
 CMD ["npm", "run", "dev"]
