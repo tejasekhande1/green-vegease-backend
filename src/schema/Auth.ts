@@ -4,9 +4,10 @@ import db from "../config/database";
 export enum UserRoleEnum {
     ADMIN = "admin",
     CUSTOMER = "customer",
+    DELIVERY_BOY="delivery-boy"
 }
 
-export const userRoleEnum = pgEnum("user_role", ["admin", "customer"]);
+export const userRoleEnum = pgEnum("user_role", ["admin", "customer","delivery-boy"]);
 
 export const userTable = pgTable("user", {
     id: uuid("id").primaryKey().defaultRandom(),
