@@ -4,13 +4,7 @@ import jwt from "jsonwebtoken";
 import { and, eq } from "drizzle-orm";
 
 import db from "../config/database";
-import { config } from "../config/config";
-import Logging from "../library/Logging";
 import { insertUser, userTable } from "../schema/Auth";
-import {
-    generateVerificationToken,
-    sendEmail,
-} from "../library/EmailVerification";
 import {
     createVerificationSMS,
     createVerificationCheck,
