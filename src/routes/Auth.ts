@@ -1,17 +1,23 @@
-import express, { Request, Response } from "express";
-import { signUp, login, sendVerificationEmail, resetPassword } from "../controllers/Auth";
+import express from "express";
+import {
+    signUp,
+    login,
+    resetPassword,
+    sendVerificationSMS,
+    verifySMSCode,
+} from "../controllers/Auth";
 import { RequestSchemas, ValidateZod } from "../validation/utils";
 
 const router = express.Router();
 
 /**
- * @swagger
+ * @openapi
  * /api/v1/auth/signup:
  *   post:
  *     summary: User signup
  *     description: Create a new user account.
  *     tags:
- *       - Auth
+ *       - Authentication
  *     requestBody:
  *       required: true
  *       content:
@@ -44,13 +50,13 @@ const router = express.Router();
 router.post("/signup", ValidateZod(RequestSchemas.auth.signUp), signUp);
 
 /**
- * @swagger
+ * @openapi
  * /api/v1/auth/login:
  *   post:
  *     summary: User login
  *     description: Authenticate a user and return a token.
  *     tags:
- *       - Auth
+ *       - Authentication
  *     requestBody:
  *       required: true
  *       content:
@@ -80,44 +86,13 @@ router.post("/signup", ValidateZod(RequestSchemas.auth.signUp), signUp);
 router.post("/login", ValidateZod(RequestSchemas.auth.login), login);
 
 /**
- * @swagger
- * /api/v1/auth/send-verification-email:
- *   post:
- *     summary: Send verification email
- *     description: Send a verification email to the user.
- *     tags:
- *       - Auth
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *             properties:
- *               email:
- *                 type: string
- *     responses:
- *       200:
- *         description: Verification email sent successfully
- *       400:
- *         description: Bad request
- *       404:
- *         description: User not found
- *       500:
- *         description: Internal server error
- */
-router.post("/send-verification-email", ValidateZod(RequestSchemas.auth.sendVerificationEmail), sendVerificationEmail);
-
-/**
- * @swagger
+ * @openapi
  * /api/v1/auth/reset-password:
  *   post:
  *     summary: Reset user password
  *     description: Allows a user to reset their password by providing the old password and a new password.
  *     tags:
- *       - Auth
+ *       - Authentication
  *     requestBody:
  *       required: true
  *       content:
@@ -210,6 +185,104 @@ router.post("/send-verification-email", ValidateZod(RequestSchemas.auth.sendVeri
  *                   type: string
  *                   example: "An error occurred while resetting the password."
  */
-router.patch('/reset-password', ValidateZod(RequestSchemas.auth.resetPassword), resetPassword);
+router.patch(
+    "/reset-password",
+    ValidateZod(RequestSchemas.auth.resetPassword),
+    resetPassword,
+);
+
+/**
+ * @openapi
+ * /send-verification-sms:
+ *   post:
+ *     summary: Send verification SMS
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - mobileNumber
+ *             properties:
+ *               mobileNumber:
+ *                 type: string
+ *                 pattern: '^\+91[0-9]{10}$'
+ *                 description: Indian mobile number with country code
+ *     responses:
+ *       '200':
+ *         description: Verification SMS sent successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Verification SMS sent successfully
+ *       '400':
+ *         description: Bad request (invalid input)
+ */
+router.post(
+    "/send-verification-sms",
+    ValidateZod(RequestSchemas.auth.sendVerificationSMS),
+    sendVerificationSMS,
+);
+
+/**
+ * @openapi
+ * /verify-sms-code:
+ *   post:
+ *     summary: Verify SMS code
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - code
+ *               - mobileNumber
+ *             properties:
+ *               code:
+ *                 type: string
+ *                 minLength: 6
+ *                 maxLength: 6
+ *                 description: 6-digit verification code
+ *               mobileNumber:
+ *                 type: string
+ *                 pattern: '^\+91[0-9]{10}$'
+ *                 description: Indian mobile number with country code
+ *     responses:
+ *       '200':
+ *         description: Verification successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Verification successful
+ *       '400':
+ *         description: Verification unsuccessful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Verification unsuccessful
+ */
+router.post(
+    "/verify-sms-code",
+    ValidateZod(RequestSchemas.auth.verifySMSCode),
+    verifySMSCode,
+);
 
 export default router;
