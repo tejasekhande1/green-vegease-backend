@@ -6,6 +6,9 @@ if (!POSTGRES_URL) {
     throw new Error("POSTGRES_URL is required.");
 }
 
+console.log(POSTGRES_URL);
+
+
 const queryClient = postgres(POSTGRES_URL);
 const db:  PostgresJsDatabase = drizzle(queryClient);
 

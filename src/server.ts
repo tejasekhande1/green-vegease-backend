@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import swaggerUi from "swagger-ui-express";
 
 import authRoutes from "./routes/Auth";
+import categoryRoutes from "./routes/Category";
 import swaggerSpec from "./config/swagger";
 import Logging from "./library/Logging";
 import { config } from "./config/config";
@@ -60,6 +61,7 @@ const startServer = () => {
 
     // Routes
     app.use("/api/v1/auth", authRoutes);
+    app.use("/api/v1/category",categoryRoutes);
 
     // healthcheck
     app.get("/ping", (req: Request, res: Response, next: NextFunction) =>
