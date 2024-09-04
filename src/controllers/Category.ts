@@ -35,3 +35,73 @@ export const createCategory = async (req: Request, res: Response): Promise<Respo
         message: "Category created successfully."
     });
 }
+
+export const updateCategory = async (req: Request, res: Response): Promise<Response> => {
+    const { id } = req.params;
+    const { categoryName } = req.body;
+
+    try {
+        const [existingCategory] = await db.select({
+            categoryName: categoryTable.categoryName
+        })
+            .from(categoryTable)
+            .where(eq(categoryTable.categoryName, categoryName));
+
+        if (existingCategory) {
+            return res.status(400).json({
+                success: false,
+                message: "Category with this name already exists",
+            });
+        }
+
+        const updatedCategory = await db.update(categoryTable)
+            .set({ categoryName: categoryName })
+            .where(eq(categoryTable.id, id));
+
+        if (!updatedCategory) {
+            return res.status(404).json({
+                success: false,
+                message: "Category not found.",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Category updated successfully.",
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to update category.",
+        });
+    }
+};
+
+export const deleteCategory = async (req: Request, res: Response): Promise<Response> => {
+    const { id } = req.params;
+
+    try {
+        const deletedCategory = await db.delete(categoryTable)
+            .where(eq(categoryTable.id, id));
+
+        if (!deletedCategory) {
+            return res.status(404).json({
+                success: false,
+                message: "Category not found.",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Category deleted successfully.",
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to delete category.",
+        });
+    }
+};
+

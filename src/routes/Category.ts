@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { RequestSchemas, ValidateZod } from "../validation/utils";
-import { createCategory } from "../controllers/Category";
+import { createCategory, deleteCategory, updateCategory } from "../controllers/Category";
 
 const router = express.Router();
 
@@ -68,5 +68,146 @@ const router = express.Router();
  */
 router.post('/', ValidateZod(RequestSchemas.category.category), createCategory);
 
+/**
+ * @swagger
+ * /api/v1/category/{id}:
+ *   put:
+ *     summary: Update an existing category
+ *     description: Updates the name of an existing category based on the provided ID.
+ *     tags:
+ *       - Categories
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the category to update.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - categoryName
+ *             properties:
+ *               categoryName:
+ *                 type: string
+ *                 description: The new name for the category.
+ *                 example: "Vegetables"
+ *     responses:
+ *       200:
+ *         description: Category updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Category updated successfully."
+ *       400:
+ *         description: Invalid request, possibly due to missing or incorrect data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid request."
+ *       404:
+ *         description: Category not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Category not found."
+ *       500:
+ *         description: Failed to update category due to server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Failed to update category."
+ */
+router.put('/', updateCategory);
+
+/**
+ * @swagger
+ * /api/v1/category/{id}:
+ *   delete:
+ *     summary: Delete a category
+ *     description: Deletes an existing category based on the provided ID.
+ *     tags:
+ *       - Categories
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the category to delete.
+ *     responses:
+ *       200:
+ *         description: Category deleted successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Category deleted successfully."
+ *       404:
+ *         description: Category not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Category not found."
+ *       500:
+ *         description: Failed to delete category due to server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Failed to delete category."
+ */
+router.delete('/', deleteCategory);
 
 export default router;
