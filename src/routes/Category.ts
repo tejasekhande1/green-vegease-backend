@@ -68,4 +68,5 @@ const router = express.Router();
  */
 router.post('/', ValidateZod(RequestSchemas.category.category), createCategory);
 
+
 export default router;
