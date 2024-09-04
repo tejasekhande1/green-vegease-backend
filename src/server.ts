@@ -61,7 +61,7 @@ const startServer = () => {
 
     // Routes
     app.use("/api/v1/auth", authRoutes);
-    app.use("/api/v1/category",categoryRoutes);
+    app.use("/api/v1/category", categoryRoutes);
 
     // healthcheck
     app.get("/ping", (req: Request, res: Response, next: NextFunction) =>
