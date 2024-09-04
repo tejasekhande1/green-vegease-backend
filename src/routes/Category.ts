@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { RequestSchemas, ValidateZod } from "../validation/utils";
-import { createCategory, deleteCategory, updateCategory } from "../controllers/Category";
+import { createCategory, deleteCategory, getAllCategories, updateCategory } from "../controllers/Category";
 
 const router = express.Router();
 
@@ -150,7 +150,7 @@ router.post('/', ValidateZod(RequestSchemas.category.category), createCategory);
  *                   type: string
  *                   example: "Failed to update category."
  */
-router.put('/', updateCategory);
+router.put('/', ValidateZod(RequestSchemas.category.category), updateCategory);
 
 /**
  * @swagger
@@ -209,5 +209,64 @@ router.put('/', updateCategory);
  *                   example: "Failed to delete category."
  */
 router.delete('/', deleteCategory);
+
+/**
+ * @swagger
+ *  /api/v1/category:
+ *   get:
+ *     summary: Retrieve all categories
+ *     description: Fetches a list of all categories from the database.
+ *     tags:
+ *       - Categories
+ *     responses:
+ *       200:
+ *         description: A list of categories retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         example: 1
+ *                       categoryName:
+ *                         type: string
+ *                         example: "Fruits"
+ *       404:
+ *         description: No categories found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "No categories found."
+ *       500:
+ *         description: Failed to retrieve categories due to a server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Failed to retrieve categories."
+ */
+router.get('/', getAllCategories);
 
 export default router;

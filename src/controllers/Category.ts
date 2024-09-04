@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import db from "../config/database";
 import { categoryTable, insertCategory } from "../schema/Category";
 import { eq } from "drizzle-orm";
+import { validate as isUUID } from 'uuid';
+
 
 export const createCategory = async (req: Request, res: Response): Promise<Response> => {
     const { categoryName } = req.body;
@@ -105,3 +107,26 @@ export const deleteCategory = async (req: Request, res: Response): Promise<Respo
     }
 };
 
+export const getAllCategories = async (req: Request, res: Response): Promise<Response> => {
+    try {
+        const categories = await db.select().from(categoryTable);
+
+        if (categories.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No categories found.",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: categories,
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to retrieve categories.",
+        });
+    }
+};
