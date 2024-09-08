@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { and, eq } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 
 import db from "../config/database";
 import { insertUser, userTable } from "../schema/Auth";
@@ -40,18 +40,22 @@ export const signUp = async (
             })
             .from(userTable)
             .where(
-                and(
+                or(
                     eq(userTable.email, email),
                     eq(userTable.mobileNumber, mobileNumber),
                 ),
             );
 
-        if (existingUser.length !== 0) {
-            return res.status(400).json({
-                success: false,
-                message: "User already exists",
-            });
-        }
+            if (existingUser.length !== 0) {
+                const message = existingUser[0].email === email
+                    ? "Email address is already registered"
+                    : "Mobile number is already registered";
+            
+                return res.status(400).json({
+                    success: false,
+                    message,
+                });
+            }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
