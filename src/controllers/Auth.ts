@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { and, eq, or } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 
 import db from "../config/database";
 import { insertUser, userTable } from "../schema/Auth";
