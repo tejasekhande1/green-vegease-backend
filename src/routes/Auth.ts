@@ -88,7 +88,7 @@ router.post("/login", ValidateZod(RequestSchemas.auth.login), login);
 /**
  * @openapi
  * /api/v1/auth/reset-password:
- *   post:
+ *   patch:
  *     summary: Reset user password
  *     description: Allows a user to reset their password by providing the old password and a new password.
  *     tags:
