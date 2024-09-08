@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import db from "../config/database";
 import { categoryTable, insertCategory } from "../schema/Category";
 import { eq } from "drizzle-orm";
-import { validate as isUUID } from 'uuid';
 
 
 export const createCategory = async (req: Request, res: Response): Promise<Response> => {
