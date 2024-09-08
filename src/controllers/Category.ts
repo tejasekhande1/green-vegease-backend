@@ -84,7 +84,7 @@ export const deleteCategory = async (req: Request, res: Response): Promise<Respo
     const { id } = req.params;
 
     try {
-        const deletedCategory = await db.delete(categoryTable)
+        const [deletedCategory] = await db.delete(categoryTable)
             .where(eq(categoryTable.id, id));
 
         if (!deletedCategory) {

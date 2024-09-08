@@ -150,7 +150,7 @@ router.post('/', ValidateZod(RequestSchemas.category.category), createCategory);
  *                   type: string
  *                   example: "Failed to update category."
  */
-router.put('/', ValidateZod(RequestSchemas.category.category), updateCategory);
+router.put('/:id', ValidateZod(RequestSchemas.category.category), updateCategory);
 
 /**
  * @swagger
@@ -208,7 +208,7 @@ router.put('/', ValidateZod(RequestSchemas.category.category), updateCategory);
  *                   type: string
  *                   example: "Failed to delete category."
  */
-router.delete('/', deleteCategory);
+router.delete('/:id', deleteCategory);
 
 /**
  * @swagger
