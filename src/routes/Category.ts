@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import { RequestSchemas, ValidateZod } from "../validation/utils";
 import { createCategory, deleteCategory, getAllCategories, updateCategory } from "../controllers/Category";
 
@@ -11,7 +11,7 @@ const router = express.Router();
  *     summary: Create a new category
  *     description: Creates a new category if it does not already exist.
  *     tags:
- *       - Categories
+ *       - Category
  *     requestBody:
  *       required: true
  *       content:
@@ -75,7 +75,7 @@ router.post('/', ValidateZod(RequestSchemas.category.category), createCategory);
  *     summary: Update an existing category
  *     description: Updates the name of an existing category based on the provided ID.
  *     tags:
- *       - Categories
+ *       - Category
  *     parameters:
  *       - in: path
  *         name: id
@@ -159,7 +159,7 @@ router.put('/:id', ValidateZod(RequestSchemas.category.category), updateCategory
  *     summary: Delete a category
  *     description: Deletes an existing category based on the provided ID.
  *     tags:
- *       - Categories
+ *       - Category
  *     parameters:
  *       - in: path
  *         name: id
@@ -217,7 +217,7 @@ router.delete('/:id', deleteCategory);
  *     summary: Retrieve all categories
  *     description: Fetches a list of all categories from the database.
  *     tags:
- *       - Categories
+ *       - Category
  *     responses:
  *       200:
  *         description: A list of categories retrieved successfully.
