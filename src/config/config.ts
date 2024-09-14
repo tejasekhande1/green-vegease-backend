@@ -1,6 +1,11 @@
 const SERVER_PORT = process.env.SERVER_PORT ? Number(process.env.SERVER_PORT) : 8000;
 
 export const config = {
+    cloudinary:{
+        cloud_name :process.env.CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret:process.env.CLOUDINARY_API_SECRET,
+    },
     posgres: {
         url: process.env.POSTGRES_URL as string,
     },
@@ -12,4 +17,4 @@ export const config = {
     server: {
         port: SERVER_PORT,
     }
-}
+} 
