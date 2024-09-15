@@ -2,9 +2,12 @@ import express, { Request, Response, NextFunction } from "express";
 import http from "http";
 import cookieParser from "cookie-parser";
 import swaggerUi from "swagger-ui-express";
+const fileUpload = require("express-fileupload");
+import { cloudinaryConnect } from "./config/cloudinary";
 
 import authRoutes from "./routes/Auth";
 import categoryRoutes from "./routes/Category";
+import productRoutes from "./routes/Product";
 import swaggerSpec from "./config/swagger";
 import Logging from "./library/Logging";
 import { config } from "./config/config";
@@ -29,9 +32,18 @@ const startServer = () => {
         next();
     });
 
-    app.use(express.urlencoded({ extended: true }));
     app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
     app.use(cookieParser());
+
+    app.use(
+        fileUpload({
+          useTempFiles: true,
+          tempFileDir: "/tmp",
+        })
+      );
+
+      cloudinaryConnect();
 
     // rules of our API
     app.use((req: Request, res: Response, next: NextFunction) => {
@@ -62,8 +74,9 @@ const startServer = () => {
     // Routes
     app.use("/api/v1/auth", authRoutes);
     app.use("/api/v1/category", categoryRoutes);
+    app.use("/api/v1/product",productRoutes);
 
-    // healthcheck
+    // health-check
     app.get("/ping", (req: Request, res: Response, next: NextFunction) =>
         res.status(200).json({ hello: "world" }),
     );

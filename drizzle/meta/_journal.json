@@ -15,6 +15,20 @@
       "when": 1725471107135,
       "tag": "0001_medical_inertia",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1726395249454,
+      "tag": "0002_solid_medusa",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1726395325692,
+      "tag": "0003_goofy_spiral",
+      "breakpoints": true
     }
   ]
 }
