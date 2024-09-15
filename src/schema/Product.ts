@@ -8,7 +8,7 @@ export const productTable = pgTable("product", {
     description: text("description"),
     price: integer("price").notNull(),
     images: text("images"),
-    categoryId: uuid("id").references(() => categoryTable.id),
+    categoryId: uuid("category_id").references(() => categoryTable.id),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().$onUpdate(() => new Date()),
 });

@@ -1,6 +1,6 @@
 {
-  "id": "90ce66a1-4e04-428b-b749-701bd737b7d8",
-  "prevId": "ff30b488-fdf7-4d4d-8665-4634449336e4",
+  "id": "a9f570ec-726d-492f-9d49-735b031c10c3",
+  "prevId": "cd96e2b5-363b-47cc-a45f-0a7adc1cf797",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -122,8 +122,9 @@
         "id": {
           "name": "id",
           "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "product_name": {
           "name": "product_name",
@@ -149,6 +150,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "category_id": {
+          "name": "category_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -165,12 +172,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "product_id_category_id_fk": {
-          "name": "product_id_category_id_fk",
+        "product_category_id_category_id_fk": {
+          "name": "product_category_id_category_id_fk",
           "tableFrom": "product",
           "tableTo": "category",
           "columnsFrom": [
-            "id"
+            "category_id"
           ],
           "columnsTo": [
             "id"

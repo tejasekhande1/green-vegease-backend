@@ -12,22 +12,15 @@
     {
       "idx": 1,
       "version": "7",
-      "when": 1725471107135,
-      "tag": "0001_medical_inertia",
+      "when": 1726404968226,
+      "tag": "0001_illegal_the_professor",
       "breakpoints": true
     },
     {
       "idx": 2,
       "version": "7",
-      "when": 1726395249454,
-      "tag": "0002_solid_medusa",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1726395325692,
-      "tag": "0003_goofy_spiral",
+      "when": 1726405006822,
+      "tag": "0002_dazzling_firebrand",
       "breakpoints": true
     }
   ]
