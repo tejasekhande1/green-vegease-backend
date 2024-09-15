@@ -8,7 +8,7 @@ import swaggerSpec from "./config/swagger";
 import Logging from "./library/Logging";
 import { config } from "./config/config";
 
-const app = express();
+export const app = express();
 
 const startServer = () => {
     // log the request

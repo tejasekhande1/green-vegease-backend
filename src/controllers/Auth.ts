@@ -1,7 +1,7 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { and, eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 
 import db from "../config/database";
 import { insertUser, userTable } from "../schema/Auth";
@@ -10,6 +10,7 @@ import {
     createVerificationCheck,
     SMSVerificationStatus,
 } from "../library/SMSVerification";
+import { nextTick } from "process";
 
 export const signUp = async (
     req: Request,
@@ -219,10 +220,14 @@ export const resetPassword = async (req: Request, res: Response) => {
     });
 };
 
-export const sendVerificationSMS = async (req: Request, res: Response) => {
+export const sendVerificationSMS = async (req: Request, res: Response, next: NextFunction) => {
     const { mobileNumber } = req.body;
 
-    await createVerificationSMS(mobileNumber);
+    try {
+        await createVerificationSMS(mobileNumber);
+    } catch (error) {
+        next(error);
+    }
 
     return res.status(200).json({
         message: "Verification SMS sent successfully",
@@ -232,11 +237,17 @@ export const sendVerificationSMS = async (req: Request, res: Response) => {
 export const verifySMSCode = async (req: Request, res: Response) => {
     const { mobileNumber, code } = req.body;
 
-    const verificationCheck = await createVerificationCheck(code, mobileNumber);
+    try {
+        const verificationCheck = await createVerificationCheck(code, mobileNumber);
 
-    if (verificationCheck.status === SMSVerificationStatus.APPROVED) {
-        return res.status(200).json({
-            message: "Verification successful",
+        if (verificationCheck.status === SMSVerificationStatus.APPROVED) {
+            return res.status(200).json({
+                message: "Verification successful",
+            });
+        }
+    } catch (error) {
+        return res.status(500).json({
+            message: "An error occurred while verifying the code",
         });
     }
 
