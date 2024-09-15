@@ -1,18 +1,15 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { and, eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 
 import db from "../config/database";
 import { insertUser, userTable } from "../schema/Auth";
 import {
-    generateVerificationToken,
-    sendEmail,
-} from "../library/EmailVerification";
-import { config } from "../config/config";
-import Logging from "../library/Logging";
-import { AuthRequestSchemas } from "../validation/Auth";
-import { z, ZodError } from "zod";
+    createVerificationSMS,
+    createVerificationCheck,
+    SMSVerificationStatus,
+} from "../library/SMSVerification";
 
 export const signUp = async (
     req: Request,
@@ -43,18 +40,22 @@ export const signUp = async (
             })
             .from(userTable)
             .where(
-                and(
+                or(
                     eq(userTable.email, email),
                     eq(userTable.mobileNumber, mobileNumber),
                 ),
             );
 
-        if (existingUser.length !== 0) {
-            return res.status(400).json({
-                success: false,
-                message: "User already exists",
-            });
-        }
+            if (existingUser.length !== 0) {
+                const message = existingUser[0].email === email
+                    ? "Email address is already registered"
+                    : "Mobile number is already registered";
+            
+                return res.status(400).json({
+                    success: false,
+                    message,
+                });
+            }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -164,48 +165,6 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
     }
 };
 
-export const sendVerificationEmail = async (req: Request, res: Response) => {
-    const { sender, verificationTemplateId: templateId } = config.sendgrid;
-
-    if (!sender || !templateId) {
-        return res.status(500).json({
-            message: "Email not sent",
-            error: "Email sender or template ID not found",
-        });
-    }
-
-    const { email: recipient } = req.body;
-    const token = generateVerificationToken();
-    const dynamicData = {
-        token: token,
-        validity_minutes: 5,
-    };
-    const mailOptions = {
-        to: recipient,
-        from: process.env.SENDGRID_SENDER_EMAIL as string,
-        templateId: process.env
-            .SENDGRID_EMAIL_VERIFICATION_TEMPLATE_ID as string,
-        dynamic_template_data: dynamicData,
-    };
-
-    try {
-        Logging.info(`Sending verification email to ${recipient}`);
-        await sendEmail(mailOptions);
-        Logging.info(`Verification email sent to ${recipient}`);
-    } catch (error) {
-        return res.status(500).json({
-            message: "Email not sent",
-            error: "Problem at third party email service",
-        });
-    }
-
-    return res.status(200).json({
-        message: "Email sent successfully",
-        receiver_email: recipient,
-        sender_email: process.env.SENDGRID_SENDER_EMAIL,
-    });
-};
-
 export const resetPassword = async (req: Request, res: Response) => {
     const { email, oldPassword, newPassword, confirmedNewPassword } = req.body;
 
@@ -226,7 +185,10 @@ export const resetPassword = async (req: Request, res: Response) => {
             });
         }
 
-        const isOldPasswordMatched = await bcrypt.compare(oldPassword, user.password);
+        const isOldPasswordMatched = await bcrypt.compare(
+            oldPassword,
+            user.password,
+        );
         if (!isOldPasswordMatched) {
             return res.status(401).json({
                 success: false,
@@ -258,5 +220,31 @@ export const resetPassword = async (req: Request, res: Response) => {
     return res.status(200).json({
         success: true,
         message: "Password reset successfully.",
+    });
+};
+
+export const sendVerificationSMS = async (req: Request, res: Response) => {
+    const { mobileNumber } = req.body;
+
+    await createVerificationSMS(mobileNumber);
+
+    return res.status(200).json({
+        message: "Verification SMS sent successfully",
+    });
+};
+
+export const verifySMSCode = async (req: Request, res: Response) => {
+    const { mobileNumber, code } = req.body;
+
+    const verificationCheck = await createVerificationCheck(code, mobileNumber);
+
+    if (verificationCheck.status === SMSVerificationStatus.APPROVED) {
+        return res.status(200).json({
+            message: "Verification successful",
+        });
+    }
+
+    return res.status(400).json({
+        message: "Verification unsuccessful",
     });
 };
