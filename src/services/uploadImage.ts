@@ -21,7 +21,7 @@ export const uploadToCloudinary = async (
   folder?: string,
   height?: number,
   quality?: number
-): Promise<UploadApiResponse | void> => {
+): Promise<string | void> => {
   try {
     const options: UploadOptions = { folder };
 
@@ -37,11 +37,11 @@ export const uploadToCloudinary = async (
     if ('path' in file) {
       // Assuming MulterFile has `path`
       const image = await cloudinary.uploader.upload(file.path, options);
-      return image;
+      return image.secure_url;
     } else if ('tempFilePath' in file) {
       // Assuming LocalFile has `tempFilePath`
       const image = await cloudinary.uploader.upload(file.tempFilePath, options);
-      return image;
+      return image.secure_url;
     } else {
       throw new Error('Unsupported file type');
     }

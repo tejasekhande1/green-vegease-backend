@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import Logging from "../library/Logging";
 import { AuthRequestSchemas } from "./Auth";
 import { CategorySchema } from "./Category";
+import { ProductSchema } from "./Product";
 
 const ValidateZod = (schema: ZodObject<any>) => {
     return async (req: Request, res: Response, next: NextFunction) => {
@@ -29,6 +30,7 @@ const ValidateZod = (schema: ZodObject<any>) => {
 const RequestSchemas = {
     auth: AuthRequestSchemas,
     category: CategorySchema,
+    product: ProductSchema,
 };
 
 export { ValidateZod, RequestSchemas };
