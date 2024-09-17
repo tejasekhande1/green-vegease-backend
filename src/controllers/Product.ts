@@ -129,9 +129,11 @@ export const deleteProduct = async (
 ): Promise<Response> => {
     const { id } = req.params;
     try {
-        const [deletedProduct] = await db.delete(productTable).where(eq(productTable.id,id));
+        const [deletedProduct] = await db
+            .delete(productTable)
+            .where(eq(productTable.id, id));
 
-        if(!deleteProduct){
+        if (!deleteProduct) {
             return res.status(404).json({
                 success: false,
                 message: "Product not found",
@@ -146,6 +148,71 @@ export const deleteProduct = async (
         return res.status(500).json({
             success: false,
             message: "Failed to delete a product",
+        });
+    }
+};
+
+export const updateProduct = async (
+    req: Request,
+    res: Response,
+): Promise<Response> => {
+    const { id } = req.params;
+    const { productName, description, price, categoryId } = req.body;
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+    try {
+        const [existingProduct] = await db
+            .select()
+            .from(productTable)
+            .where(eq(productTable.id, id));
+
+        console.log("Existed Product -> ", existingProduct);
+
+        if (!existingProduct) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found",
+            });
+        }
+
+        let imageUrl = existingProduct.images;
+
+        if (files && files["image"]) {
+            const imageFile = files["image"];
+            imageUrl =
+                (await uploadToCloudinary(
+                    imageFile,
+                    config.cloudinary.folder,
+                    1000,
+                    1000,
+                )) || null;
+            if (!imageUrl) {
+                throw new Error("Image upload failed");
+            }
+        }
+
+        const updatedProduct = await db
+            .update(productTable)
+            .set({
+                productName,
+                description,
+                price,
+                categoryId,
+                images: imageUrl,
+            })
+            .where(eq(productTable.id, id));
+
+        return res.status(200).json({
+            success: true,
+            message: "Product updated successfully",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message:
+                error instanceof Error
+                    ? error.message
+                    : "Internal Server Error",
         });
     }
 };
