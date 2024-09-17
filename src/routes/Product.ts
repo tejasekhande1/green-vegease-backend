@@ -242,6 +242,99 @@ router.get("/", getProducts);
  */
 router.delete("/:id", deleteProduct);
 
+/**
+ * @swagger
+ * /api/v1/product/{id}:
+ *   put:
+ *     summary: Update an existing product
+ *     description: Updates the details of an existing product. Optionally, you can upload a new image for the product.
+ *     tags:
+ *      - Products
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the product to be updated.
+ *         schema:
+ *           type: string
+ *           example: "d0aee4c0-2f6c-4d34-8727-2f5c76cf7c8d"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               productName:
+ *                 type: string
+ *                 example: "Smartphone"
+ *               description:
+ *                 type: string
+ *                 example: "Updated description"
+ *               price:
+ *                 type: number
+ *                 example: 349.99
+ *               categoryId:
+ *                 type: string
+ *                 example: "f1e6e8d4-3b8e-4e9c-bd56-6caa7a6b7c9b"
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Optional image file to upload
+ *     responses:
+ *       200:
+ *         description: Product updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Product updated successfully"
+ *       400:
+ *         description: Bad request if validation fails or required fields are missing
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid input data"
+ *       404:
+ *         description: Product not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Product not found"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Internal Server Error"
+ */
 router.put("/:id", updateProduct);
 
 export default router;
