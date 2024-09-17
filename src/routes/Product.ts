@@ -1,6 +1,6 @@
 import express from "express";
 import { uploadProductImage } from "../controllers/ImageUpload";
-import { addProduct, getProducts } from "../controllers/Product";
+import { addProduct, deleteProduct, getProducts } from "../controllers/Product";
 import { RequestSchemas, ValidateZod } from "../validation/utils";
 const router = express.Router();
 
@@ -110,5 +110,7 @@ const router = express.Router();
 router.post("/", ValidateZod(RequestSchemas.product.product), addProduct);
 
 router.get("/", getProducts);
+
+router.delete("/:id", deleteProduct);
 
 export default router;

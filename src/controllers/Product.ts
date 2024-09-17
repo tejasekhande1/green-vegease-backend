@@ -121,3 +121,31 @@ export const getProducts = async (
         });
     }
 };
+
+// TODO : Think about image of this product should be delete from cloudinary
+export const deleteProduct = async (
+    req: Request,
+    res: Response,
+): Promise<Response> => {
+    const { id } = req.params;
+    try {
+        const [deletedProduct] = await db.delete(productTable).where(eq(productTable.id,id));
+
+        if(!deleteProduct){
+            return res.status(404).json({
+                success: false,
+                message: "Product not found",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Product deleted successfully",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to delete a product",
+        });
+    }
+};
