@@ -109,8 +109,137 @@ const router = express.Router();
  */
 router.post("/", ValidateZod(RequestSchemas.product.product), addProduct);
 
+/**
+ * @swagger
+ * /api/v1/product:
+ *   get:
+ *     summary: Retrieve a list of products
+ *     description: Fetches a list of products from the database. Optionally, you can filter products by category.
+ *     tags:
+ *      - Products
+ *     parameters:
+ *       - in: query
+ *         name: category
+ *         description: The category to filter products by.
+ *         required: false
+ *         schema:
+ *           type: string
+ *           example: "Electronics"
+ *     responses:
+ *       200:
+ *         description: Products fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Products fetched successfully"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "d0aee4c0-2f6c-4d34-8727-2f5c76cf7c8d"
+ *                       productName:
+ *                         type: string
+ *                         example: "Smartphone"
+ *                       description:
+ *                         type: string
+ *                         example: "Latest model with high resolution camera"
+ *                       price:
+ *                         type: number
+ *                         example: 299.99
+ *                       images:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           example: "https://example.com/image.jpg"
+ *                       categoryId:
+ *                         type: string
+ *                         example: "f1e6e8d4-3b8e-4e9c-bd56-6caa7a6b7c9b"
+ *                       categoryName:
+ *                         type: string
+ *                         example: "Electronics"
+ *       500:
+ *         description: Failed to fetch products
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Failed to fetch products"
+ */
 router.get("/", getProducts);
 
+/**
+ * @swagger
+ * /api/v1/product/{id}:
+ *   delete:
+ *     summary: Delete a product by ID
+ *     description: Deletes a product from the database using the provided product ID.
+ *     tags:
+ *      - Products
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the product to be deleted.
+ *         schema:
+ *           type: string
+ *           example: "d0aee4c0-2f6c-4d34-8727-2f5c76cf7c8d"
+ *     responses:
+ *       200:
+ *         description: Product deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Product deleted successfully"
+ *       404:
+ *         description: Product not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Product not found"
+ *       500:
+ *         description: Failed to delete a product
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Failed to delete a product"
+ */
 router.delete("/:id", deleteProduct);
 
 export default router;
