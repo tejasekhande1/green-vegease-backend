@@ -1,6 +1,5 @@
 import { ZodObject, ZodError } from "zod";
 import { NextFunction, Request, Response } from "express";
-import Logging from "../library/Logging";
 import { AuthRequestSchemas } from "./Auth";
 import { CategorySchema } from "./Category";
 import { ProductSchema } from "./Product";
