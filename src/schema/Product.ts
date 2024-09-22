@@ -1,6 +1,13 @@
-import { text, uuid, pgTable, varchar, timestamp, integer, foreignKey } from "drizzle-orm/pg-core";
+import {
+    text,
+    uuid,
+    pgTable,
+    varchar,
+    timestamp,
+    integer,
+} from "drizzle-orm/pg-core";
 import db from "../config/database";
-import { categoryTable } from "./Category"
+import { categoryTable } from "./Category";
 
 export const productTable = pgTable("product", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -8,14 +15,19 @@ export const productTable = pgTable("product", {
     description: text("description"),
     price: integer("price").notNull(),
     images: text("images"),
+    quantityInKg: integer("quantity_in_kg").notNull().default(0),
     categoryId: uuid("category_id").references(() => categoryTable.id),
     createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().$onUpdate(() => new Date()),
+    updatedAt: timestamp("updated_at")
+        .notNull()
+        .$onUpdate(() => new Date()),
 });
 
 export type InsertProduct = typeof productTable.$inferInsert;
 export type SelectProduct = typeof productTable.$inferSelect;
 
-export async function insertProduct(product: InsertProduct): Promise<SelectProduct[]> {
+export async function insertProduct(
+    product: InsertProduct,
+): Promise<SelectProduct[]> {
     return db.insert(productTable).values(product).returning();
 }

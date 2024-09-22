@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { deleteProduct } from "../controllers/Product";
 
 export const ProductSchema = {
     addProduct: z.object({
@@ -13,6 +12,9 @@ export const ProductSchema = {
         }),
         price: z.string({
             required_error: "price is required.",
+        }),
+        quantityInKg: z.number({
+            required_error: "Product quantity must be required.",
         }),
         categoryId: z.string().uuid("Invalid category ID format").optional(),
     }),

@@ -11,7 +11,7 @@ export const addProduct = async (
     res: Response,
 ): Promise<Response> => {
     const { folder } = config.cloudinary;
-    const { productName, description, price, categoryId } = req.body;
+    const { productName, description, price, quantityInKg, categoryId } = req.body;
 
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
     const productPrice = parseInt(price);
@@ -42,6 +42,7 @@ export const addProduct = async (
             price: productPrice,
             images: imageUrl,
             categoryId,
+            quantityInKg
         });
 
         return res.status(201).json({
@@ -76,6 +77,7 @@ export const getProducts = async (
                 images: productTable.images,
                 categoryId: productTable.categoryId,
                 categoryName: categoryTable.categoryName,
+                quantityInKg: productTable.quantityInKg,
             })
             .from(productTable)
             .leftJoin(
@@ -144,7 +146,8 @@ export const updateProduct = async (
     res: Response,
 ): Promise<Response> => {
     const { id } = req.params;
-    const { productName, description, price, categoryId } = req.body;
+    const { productName, description, price, categoryId, quantityInKg } =
+        req.body;
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
     try {
@@ -152,8 +155,6 @@ export const updateProduct = async (
             .select()
             .from(productTable)
             .where(eq(productTable.id, id));
-
-        console.log("Existed Product -> ", existingProduct);
 
         if (!existingProduct) {
             return res.status(404).json({
@@ -186,12 +187,14 @@ export const updateProduct = async (
                 price,
                 categoryId,
                 images: imageUrl,
+                quantityInKg
             })
             .where(eq(productTable.id, id));
 
         return res.status(200).json({
             success: true,
             message: "Product updated successfully",
+            data: updateProduct,
         });
     } catch (error) {
         return res.status(500).json({
