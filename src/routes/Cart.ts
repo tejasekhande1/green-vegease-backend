@@ -1,6 +1,5 @@
 import express from "express";
-import { ValidateZod } from "../validation/utils";
-import { cartSchemas } from "../validation/Cart";
+import { RequestSchemas, ValidateZod } from "../validation/utils";
 import { asyncErrorHandler } from "../controllers/utils";
 import { retrieveCart } from "../controllers/Cart";
 
@@ -8,7 +7,7 @@ const router = express.Router();
 
 router.get(
     "/:userId",
-    ValidateZod(cartSchemas.retrieveCart),
+    ValidateZod(RequestSchemas.cart.retrieveCart),
     asyncErrorHandler(retrieveCart),
 );
 

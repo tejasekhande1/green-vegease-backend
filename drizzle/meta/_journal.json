@@ -43,6 +43,13 @@
       "when": 1727016416191,
       "tag": "0005_stale_silhouette",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1727027433080,
+      "tag": "0006_wakeful_loners",
+      "breakpoints": true
     }
   ]
 }

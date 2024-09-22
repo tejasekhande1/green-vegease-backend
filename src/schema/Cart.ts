@@ -34,6 +34,7 @@ export type SelectCart = typeof cartTable.$inferSelect;
 export const cartItemTable = pgTable(
     "cart_item",
     {
+        id: uuid("id").primaryKey().defaultRandom(),
         cartId: uuid("cart_id")
             .references(() => cartTable.id, { onDelete: "cascade" })
             .notNull(),
@@ -48,8 +49,7 @@ export const cartItemTable = pgTable(
     },
     (table) => {
         return {
-            cartIdIdx: uniqueIndex("cart_id_idx").on(table.cartId),
-            pk: primaryKey({ columns: [table.cartId, table.productId] }),
+            cartProductUnique: uniqueIndex("cart_product_unique").on(table.cartId, table.productId),
         };
     },
 );
