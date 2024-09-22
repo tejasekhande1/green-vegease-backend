@@ -33,8 +33,12 @@ const router = express.Router();
  *                 example: "A high-performance laptop for gaming and work."
  *               price:
  *                 type: string
- *                 description: "The price of the product in numeric format"
+ *                 description: "The price of the product in string format"
  *                 example: "1200"
+ *               quantityInKg:
+ *                 type: number
+ *                 description: "The quantity of the product in numeric format"
+ *                 example: 20
  *               categoryId:
  *                 type: string
  *                 description: "The ID of the category the product belongs to"
@@ -49,6 +53,7 @@ const router = express.Router();
  *               - price
  *               - categoryId
  *               - image
+ *               - quantityInKg
  *     responses:
  *       201:
  *         description: Product added successfully
