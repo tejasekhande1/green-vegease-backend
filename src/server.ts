@@ -8,6 +8,8 @@ import { cloudinaryConnect } from "./config/cloudinary";
 import authRoutes from "./routes/Auth";
 import categoryRoutes from "./routes/Category";
 import productRoutes from "./routes/Product";
+import cartRoutes from "./routes/Cart";
+
 import swaggerSpec from "./config/swagger";
 import Logging from "./library/Logging";
 import { config } from "./config/config";
@@ -75,6 +77,7 @@ const startServer = () => {
     app.use("/api/v1/auth", authRoutes);
     app.use("/api/v1/category", categoryRoutes);
     app.use("/api/v1/product",productRoutes);
+    app.use("/api/v1/cart", cartRoutes);
 
     // health-check
     app.get("/ping", (req: Request, res: Response, next: NextFunction) =>
