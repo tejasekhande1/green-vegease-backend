@@ -11,7 +11,7 @@ export const addProduct = async (
     res: Response,
 ): Promise<Response> => {
     const { folder } = config.cloudinary;
-    const { productName, description, price, categoryId } = req.body;
+    const { productName, description, price, quantityInKg, categoryId } = req.body;
 
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
     const productPrice = parseInt(price);
@@ -42,6 +42,7 @@ export const addProduct = async (
             price: productPrice,
             images: imageUrl,
             categoryId,
+            quantityInKg
         });
 
         return res.status(201).json({
@@ -60,7 +61,6 @@ export const addProduct = async (
     }
 };
 
-// TODO : Need to optimized this i tried but getting some error in 'where' clause
 export const getProducts = async (
     req: Request,
     res: Response,
@@ -68,46 +68,34 @@ export const getProducts = async (
     try {
         const { category } = req.query;
 
-        let baseQuery;
+        const baseQuery = db
+            .select({
+                id: productTable.id,
+                productName: productTable.productName,
+                description: productTable.description,
+                price: productTable.price,
+                images: productTable.images,
+                categoryId: productTable.categoryId,
+                categoryName: categoryTable.categoryName,
+                quantityInKg: productTable.quantityInKg,
+            })
+            .from(productTable)
+            .leftJoin(
+                categoryTable,
+                eq(productTable.categoryId, categoryTable.id),
+            );
 
-        if (!category) {
-            baseQuery = db
-                .select({
-                    id: productTable.id,
-                    productName: productTable.productName,
-                    description: productTable.description,
-                    price: productTable.price,
-                    images: productTable.images,
-                    categoryId: productTable.categoryId,
-                    categoryName: categoryTable.categoryName,
-                })
-                .from(productTable)
-                .leftJoin(
-                    categoryTable,
-                    eq(productTable.categoryId, categoryTable.id),
-                );
-        }
+        let productsQuery;
 
         if (category) {
-            baseQuery = db
-                .select({
-                    id: productTable.id,
-                    productName: productTable.productName,
-                    description: productTable.description,
-                    price: productTable.price,
-                    images: productTable.images,
-                    categoryId: productTable.categoryId,
-                    categoryName: categoryTable.categoryName,
-                })
-                .from(productTable)
-                .leftJoin(
-                    categoryTable,
-                    eq(productTable.categoryId, categoryTable.id),
-                )
-                .where(eq(categoryTable.categoryName, String(category)));
+            productsQuery = baseQuery.where(
+                eq(categoryTable.categoryName, String(category)),
+            );
+        } else {
+            productsQuery = baseQuery;
         }
 
-        const products = await baseQuery;
+        const products = await productsQuery;
 
         return res.status(200).json({
             success: true,
@@ -118,6 +106,7 @@ export const getProducts = async (
         return res.status(500).json({
             success: false,
             message: "Failed to fetch products",
+            error: (error as Error).message,
         });
     }
 };
@@ -157,7 +146,8 @@ export const updateProduct = async (
     res: Response,
 ): Promise<Response> => {
     const { id } = req.params;
-    const { productName, description, price, categoryId } = req.body;
+    const { productName, description, price, categoryId, quantityInKg } =
+        req.body;
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
     try {
@@ -165,8 +155,6 @@ export const updateProduct = async (
             .select()
             .from(productTable)
             .where(eq(productTable.id, id));
-
-        console.log("Existed Product -> ", existingProduct);
 
         if (!existingProduct) {
             return res.status(404).json({
@@ -199,12 +187,14 @@ export const updateProduct = async (
                 price,
                 categoryId,
                 images: imageUrl,
+                quantityInKg
             })
             .where(eq(productTable.id, id));
 
         return res.status(200).json({
             success: true,
             message: "Product updated successfully",
+            data: updateProduct,
         });
     } catch (error) {
         return res.status(500).json({

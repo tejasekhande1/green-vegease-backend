@@ -1,6 +1,10 @@
 import express from "express";
-import { uploadProductImage } from "../controllers/ImageUpload";
-import { addProduct, deleteProduct, getProducts, updateProduct } from "../controllers/Product";
+import {
+    addProduct,
+    deleteProduct,
+    getProducts,
+    updateProduct,
+} from "../controllers/Product";
 import { RequestSchemas, ValidateZod } from "../validation/utils";
 const router = express.Router();
 
@@ -29,8 +33,12 @@ const router = express.Router();
  *                 example: "A high-performance laptop for gaming and work."
  *               price:
  *                 type: string
- *                 description: "The price of the product in numeric format"
+ *                 description: "The price of the product in string format"
  *                 example: "1200"
+ *               quantityInKg:
+ *                 type: number
+ *                 description: "The quantity of the product in numeric format"
+ *                 example: 20
  *               categoryId:
  *                 type: string
  *                 description: "The ID of the category the product belongs to"
@@ -45,6 +53,7 @@ const router = express.Router();
  *               - price
  *               - categoryId
  *               - image
+ *               - quantityInKg
  *     responses:
  *       201:
  *         description: Product added successfully
@@ -107,7 +116,7 @@ const router = express.Router();
  *                   type: string
  *                   example: "Internal Server Error"
  */
-router.post("/", ValidateZod(RequestSchemas.product.product), addProduct);
+router.post("/", ValidateZod(RequestSchemas.product.addProduct), addProduct);
 
 /**
  * @swagger
