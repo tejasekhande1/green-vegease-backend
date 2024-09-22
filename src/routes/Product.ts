@@ -1,6 +1,10 @@
 import express from "express";
-import { uploadProductImage } from "../controllers/ImageUpload";
-import { addProduct, deleteProduct, getProducts, updateProduct } from "../controllers/Product";
+import {
+    addProduct,
+    deleteProduct,
+    getProducts,
+    updateProduct,
+} from "../controllers/Product";
 import { RequestSchemas, ValidateZod } from "../validation/utils";
 const router = express.Router();
 
@@ -107,7 +111,7 @@ const router = express.Router();
  *                   type: string
  *                   example: "Internal Server Error"
  */
-router.post("/", ValidateZod(RequestSchemas.product.product), addProduct);
+router.post("/", ValidateZod(RequestSchemas.product.addProduct), addProduct);
 
 /**
  * @swagger

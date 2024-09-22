@@ -1,7 +1,8 @@
 import { z } from "zod";
+import { deleteProduct } from "../controllers/Product";
 
 export const ProductSchema = {
-    product: z.object({
+    addProduct: z.object({
         productName: z.string({
             required_error: "productName is required.",
             invalid_type_error: "productName must be a string.",

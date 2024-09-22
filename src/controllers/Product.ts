@@ -60,7 +60,6 @@ export const addProduct = async (
     }
 };
 
-// TODO : Need to optimized this i tried but getting some error in 'where' clause
 export const getProducts = async (
     req: Request,
     res: Response,
@@ -68,46 +67,33 @@ export const getProducts = async (
     try {
         const { category } = req.query;
 
-        let baseQuery;
+        const baseQuery = db
+            .select({
+                id: productTable.id,
+                productName: productTable.productName,
+                description: productTable.description,
+                price: productTable.price,
+                images: productTable.images,
+                categoryId: productTable.categoryId,
+                categoryName: categoryTable.categoryName,
+            })
+            .from(productTable)
+            .leftJoin(
+                categoryTable,
+                eq(productTable.categoryId, categoryTable.id),
+            );
 
-        if (!category) {
-            baseQuery = db
-                .select({
-                    id: productTable.id,
-                    productName: productTable.productName,
-                    description: productTable.description,
-                    price: productTable.price,
-                    images: productTable.images,
-                    categoryId: productTable.categoryId,
-                    categoryName: categoryTable.categoryName,
-                })
-                .from(productTable)
-                .leftJoin(
-                    categoryTable,
-                    eq(productTable.categoryId, categoryTable.id),
-                );
-        }
+        let productsQuery;
 
         if (category) {
-            baseQuery = db
-                .select({
-                    id: productTable.id,
-                    productName: productTable.productName,
-                    description: productTable.description,
-                    price: productTable.price,
-                    images: productTable.images,
-                    categoryId: productTable.categoryId,
-                    categoryName: categoryTable.categoryName,
-                })
-                .from(productTable)
-                .leftJoin(
-                    categoryTable,
-                    eq(productTable.categoryId, categoryTable.id),
-                )
-                .where(eq(categoryTable.categoryName, String(category)));
+            productsQuery = baseQuery.where(
+                eq(categoryTable.categoryName, String(category)),
+            );
+        } else {
+            productsQuery = baseQuery;
         }
 
-        const products = await baseQuery;
+        const products = await productsQuery;
 
         return res.status(200).json({
             success: true,
@@ -118,6 +104,7 @@ export const getProducts = async (
         return res.status(500).json({
             success: false,
             message: "Failed to fetch products",
+            error: (error as Error).message,
         });
     }
 };

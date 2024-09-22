@@ -1,9 +1,5 @@
 import { Request, Response } from "express";
 import { uploadToCloudinary } from "../services/uploadImage";
-import multer, { Multer } from 'multer';
-import { log } from "console";
-
-
 
 export const uploadProductImage = async (req: Request, res: Response): Promise<Response> => {
     try {
