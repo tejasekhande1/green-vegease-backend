@@ -29,6 +29,13 @@
       "when": 1726405492502,
       "tag": "0003_green_leo",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1726999339578,
+      "tag": "0004_cultured_titanium_man",
+      "breakpoints": true
     }
   ]
 }
