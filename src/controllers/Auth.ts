@@ -4,7 +4,8 @@ import jwt from "jsonwebtoken";
 import { eq, or } from "drizzle-orm";
 
 import db from "../config/database";
-import { insertUser, userTable } from "../schema/Auth";
+import { userTable } from "../schema/Auth";
+import { insertUser } from "../schema/utils";
 import {
     createVerificationSMS,
     createVerificationCheck,
@@ -46,16 +47,17 @@ export const signUp = async (
                 ),
             );
 
-            if (existingUser.length !== 0) {
-                const message = existingUser[0].email === email
+        if (existingUser.length !== 0) {
+            const message =
+                existingUser[0].email === email
                     ? "Email address is already registered"
                     : "Mobile number is already registered";
-            
-                return res.status(400).json({
-                    success: false,
-                    message,
-                });
-            }
+
+            return res.status(400).json({
+                success: false,
+                message,
+            });
+        }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 

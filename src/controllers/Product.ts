@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { config } from "../config/config";
 import { uploadToCloudinary } from "../services/uploadImage";
-import { insertProduct, productTable } from "../schema/Product";
+import { productTable } from "../schema/Product";
+import { insertProduct } from "../schema/utils";
 import db from "../config/database";
 import { categoryTable } from "../schema/Category";
 import { eq } from "drizzle-orm";
@@ -37,7 +38,7 @@ export const addProduct = async (
         }
 
         const product = await insertProduct({
-            productName,
+            name: productName,
             description,
             price: productPrice,
             images: imageUrl,
@@ -71,12 +72,12 @@ export const getProducts = async (
         const baseQuery = db
             .select({
                 id: productTable.id,
-                productName: productTable.productName,
+                name: productTable.name,
                 description: productTable.description,
                 price: productTable.price,
                 images: productTable.images,
                 categoryId: productTable.categoryId,
-                categoryName: categoryTable.categoryName,
+                categoryName: categoryTable.name,
                 quantityInKg: productTable.quantityInKg,
             })
             .from(productTable)
@@ -89,7 +90,7 @@ export const getProducts = async (
 
         if (category) {
             productsQuery = baseQuery.where(
-                eq(categoryTable.categoryName, String(category)),
+                eq(categoryTable.name, String(category)),
             );
         } else {
             productsQuery = baseQuery;
@@ -146,8 +147,7 @@ export const updateProduct = async (
     res: Response,
 ): Promise<Response> => {
     const { id } = req.params;
-    const { productName, description, price, categoryId, quantityInKg } =
-        req.body;
+    const { productName, description, price, categoryId, quantityInKg } = req.body;
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
     try {
@@ -182,7 +182,7 @@ export const updateProduct = async (
         const updatedProduct = await db
             .update(productTable)
             .set({
-                productName,
+                name: productName,
                 description,
                 price,
                 categoryId,

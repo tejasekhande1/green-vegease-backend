@@ -4,6 +4,7 @@ import {
     uuid,
     uniqueIndex,
     integer,
+    primaryKey,
 } from "drizzle-orm/pg-core";
 import { userTable } from "./Auth";
 import { productTable } from "./Product";
@@ -13,7 +14,7 @@ export const cartTable = pgTable(
     {
         id: uuid("id").primaryKey().defaultRandom(),
         userId: uuid("user_id")
-            .references(() => userTable.id)
+            .references(() => userTable.id, { onDelete: "cascade" })
             .notNull(),
         createdAt: timestamp("created_at").notNull().defaultNow(),
         updatedAt: timestamp("updated_at")
@@ -27,15 +28,17 @@ export const cartTable = pgTable(
     },
 );
 
+export type InsertCart = typeof cartTable.$inferInsert;
+export type SelectCart = typeof cartTable.$inferSelect;
+
 export const cartItemTable = pgTable(
     "cart_item",
     {
-        id: uuid("id").primaryKey().defaultRandom(),
         cartId: uuid("cart_id")
-            .references(() => cartTable.id)
+            .references(() => cartTable.id, { onDelete: "cascade" })
             .notNull(),
         productId: uuid("product_id")
-            .references(() => productTable.id)
+            .references(() => productTable.id, { onDelete: "cascade" })
             .notNull(),
         quantity: integer("quantity").notNull().default(1),
         createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -46,6 +49,8 @@ export const cartItemTable = pgTable(
     (table) => {
         return {
             cartIdIdx: uniqueIndex("cart_id_idx").on(table.cartId),
+            pk: primaryKey({ columns: [table.cartId, table.productId] }),
         };
     },
 );
+

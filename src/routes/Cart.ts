@@ -1,8 +1,16 @@
 import express from "express";
+import { ValidateZod } from "../validation/utils";
+import { cartSchemas } from "../validation/Cart";
+import { asyncErrorHandler } from "../controllers/utils";
+import { retrieveCart } from "../controllers/Cart";
 
 const router = express.Router();
 
-router.get("/:userId");
+router.get(
+    "/:userId",
+    ValidateZod(cartSchemas.retrieveCart),
+    asyncErrorHandler(retrieveCart),
+);
 
 router.post("/:cartId/items");
 
