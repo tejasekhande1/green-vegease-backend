@@ -1,7 +1,14 @@
 import express from "express";
 import { RequestSchemas, ValidateZod } from "../validation/utils";
 import { asyncErrorHandler } from "../controllers/utils";
-import { retrieveCart } from "../controllers/Cart";
+import {
+    retrieveCart,
+    addCartItem,
+    updateCartItem,
+    deleteCartItem,
+    clearCart,
+    getCartTotal,
+} from "../controllers/Cart";
 
 const router = express.Router();
 
@@ -11,14 +18,34 @@ router.get(
     asyncErrorHandler(retrieveCart),
 );
 
-router.post("/:cartId/items");
+router.post(
+    "/:cartId/items",
+    ValidateZod(RequestSchemas.cart.addCartItem),
+    asyncErrorHandler(addCartItem),
+);
 
-router.put("/:cartId/items/:itemId");
+router.put(
+    "/:cartId/items/:itemId",
+    ValidateZod(RequestSchemas.cart.updateCartItem),
+    asyncErrorHandler(updateCartItem),
+);
 
-router.delete("/:cartId/items/:itemId");
+router.delete(
+    "/:cartId/items/:itemId",
+    ValidateZod(RequestSchemas.cart.deleteCartItem),
+    asyncErrorHandler(deleteCartItem),
+);
 
-router.delete("/:cartId");
+router.delete(
+    "/:cartId",
+    ValidateZod(RequestSchemas.cart.clearCart),
+    asyncErrorHandler(clearCart),
+);
 
-router.get("/:cartId/total");
+router.get(
+    "/:cartId/total",
+    ValidateZod(RequestSchemas.cart.getCartTotal),
+    asyncErrorHandler(getCartTotal),
+);
 
 export default router;

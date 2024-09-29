@@ -3,6 +3,8 @@ import { cartItemTable, cartTable } from "../schema/Cart";
 import db from "../config/database";
 import { eq } from "drizzle-orm";
 import { successResponse } from "./utils";
+import { IRequestWithLocal } from "../library/types";
+import { SelectUser } from "../schema";
 
 export const retrieveCart = async (
     req: Request,
@@ -87,10 +89,7 @@ export const deleteCartItem = async (
     return successResponse(res, cart, 204, "Item deleted successfully");
 };
 
-export const clearCart = async (
-    req: Request,
-    res: Response,
-): Promise<any> => {
+export const clearCart = async (req: Request, res: Response): Promise<any> => {
     const { cartId } = req.params;
 
     const cart = await db
@@ -133,3 +132,15 @@ export const getCartTotal = async (
         "Cart total retrieved successfully",
     );
 };
+
+export const createCartForUser = async (req: IRequestWithLocal, res: Response, next: NextFunction) => {
+    const user: SelectUser = req.local?.user;
+
+    if (!user) {
+        new Error("createCartForUser expects user to be in the request.local object");
+    }
+
+    await db.insert(cartTable).values({ userId: user.id}).execute();
+
+    next();
+}

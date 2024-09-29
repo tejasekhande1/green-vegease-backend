@@ -5,16 +5,17 @@ import { eq, and } from "drizzle-orm";
 import { userTable } from "../schema/Auth";
 import { cartItemTable, cartTable } from "../schema/Cart";
 import { productTable } from "../schema/Product";
+import { IRequestWithLocal } from "../library/types";
 
-type controllerFunction = (
+type ControllerFunction = (
     req: Request,
     res: Response,
-    next?: NextFunction,
-) => Promise<void>;
+    next: NextFunction,
+) => Promise<any> | any;
 
 export const asyncErrorHandler =
-    (fn: controllerFunction) =>
-    (req: Request, res: Response, next: NextFunction) => {
+    (fn: ControllerFunction) =>
+    (req: Request | IRequestWithLocal, res: Response, next: NextFunction) => {
         Promise.resolve(fn(req, res, next)).catch(next);
     };
 
