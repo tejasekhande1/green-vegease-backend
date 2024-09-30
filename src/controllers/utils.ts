@@ -6,6 +6,7 @@ import { userTable } from "../schema/Auth";
 import { cartItemTable, cartTable } from "../schema/Cart";
 import { productTable } from "../schema/Product";
 import { IRequestWithLocal } from "../library/types";
+import Logging from "../library/Logging";
 
 type ControllerFunction = (
     req: Request,
@@ -45,68 +46,98 @@ export const errorResponse = (
 };
 
 export const isUserExists = async (userId: string): Promise<boolean> => {
-    const user = await db.query.userTable.findFirst({
-        where: eq(userTable.id, userId),
-    });
+    try {
+        const user = await db.query.userTable.findFirst({
+            where: eq(userTable.id, userId),
+        });
 
-    if (user === undefined) {
+        if (user === undefined) {
+            return false;
+        }
+
+        return true;
+    } catch (error) {
+        Logging.error(error);
         return false;
     }
-
-    return true;
 };
 
 export const isCartExists = async (cartId: string): Promise<boolean> => {
-    const cart = await db.query.cartTable.findFirst({
-        where: eq(cartTable.id, cartId),
-    });
+    try {
+        const cart = await db.query.cartTable.findFirst({
+            where: eq(cartTable.id, cartId),
+        });
 
-    if (cart === undefined) {
+        if (cart === undefined) {
+            return false;
+        }
+
+        return true;
+    } catch (error) {
+        Logging.error(error);
         return false;
     }
-
-    return true;
 };
 
 export const isProductExists = async (productId: string): Promise<boolean> => {
-    const product = await db.query.productTable.findFirst({
-        where: eq(productTable.id, productId),
-    });
+    try {
+        const product = await db.query.productTable.findFirst({
+            where: eq(productTable.id, productId),
+        });
 
-    if (product === undefined) {
+        if (product === undefined) {
+            return false;
+        }
+
+        return true;
+    } catch (error) {
+        Logging.error(error);
         return false;
     }
-
-    return true;
 };
 
-export const isCartItemExists = async (cartItemId: string): Promise<boolean> => {
-    const cartItem = await db.query.cartItemTable.findFirst({
-        where: eq(cartItemTable.id, cartItemId),
-    });
+export const isCartItemExists = async (
+    cartItemId: string,
+): Promise<boolean> => {
+    try {
+        const cartItem = await db.query.cartItemTable.findFirst({
+            where: eq(cartItemTable.id, cartItemId),
+        });
 
-    if (cartItem === undefined) {
+        if (cartItem === undefined) {
+            return false;
+        }
+
+        return true;
+    } catch (error) {
+        Logging.error(error);
         return false;
     }
+};
 
-    return true;
-}
+export const isCartProductExists = async (
+    cartId: string,
+    productId: string,
+): Promise<boolean> => {
+    try {
+        const cartItem = await db
+            .select({ productId: cartItemTable.productId })
+            .from(cartItemTable)
+            .where(
+                and(
+                    eq(cartItemTable.cartId, cartId),
+                    eq(cartItemTable.productId, productId),
+                ),
+            )
+            .limit(1);
 
-export const isCartProductExists = async (cartId: string, productId: string): Promise<boolean> => {
-    const cartItem = await db
-        .select({ productId: cartItemTable.productId })
-        .from(cartItemTable)
-        .where(
-            and(
-                eq(cartItemTable.cartId, cartId),
-                eq(cartItemTable.productId, productId),
-            ),
-        )
-        .limit(1);
+        if (cartItem.length === 0) {
+            return false;
+        }
 
-    if (cartItem.length === 0) {
+        return true;
+    } catch (error) {
+        Logging.error(error);
         return false;
     }
-
-    return true;
 };

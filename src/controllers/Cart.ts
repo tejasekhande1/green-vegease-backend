@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { cartItemTable, cartTable } from "../schema/Cart";
 import db from "../config/database";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { successResponse } from "./utils";
 import { IRequestWithLocal } from "../library/types";
 import { SelectUser } from "../schema";
@@ -50,9 +50,28 @@ export const addCartItem = async (
 
     const { productId, quantity } = req.body;
 
+    const cartProduct = await db
+        .select({ id: cartItemTable.id })
+        .from(cartItemTable)
+        .where(
+            and(
+                eq(cartItemTable.cartId, cartId),
+                eq(cartItemTable.productId, productId),
+            ),
+        )
+        .limit(1);
+
+    if (cartProduct.length) {
+        return res.status(400).json({
+            success: false,
+            message: "Item already exists in cart",
+        });
+    }
+
     const cart = await db
         .insert(cartItemTable)
         .values({ productId, quantity, cartId })
+        .returning()
         .execute();
 
     return successResponse(res, cart, 201, "Item added to cart successfully");
@@ -66,10 +85,15 @@ export const updateCartItem = async (
 
     const { quantity } = req.body;
 
+    const tmp = await db.query.cartItemTable.findFirst({
+        where: eq(cartItemTable.id, itemId),
+    });
+
     const cart = await db
         .update(cartItemTable)
         .set({ quantity })
         .where(eq(cartItemTable.id, itemId))
+        .returning()
         .execute();
 
     return successResponse(res, cart, 200, "Item updated successfully");
@@ -84,6 +108,7 @@ export const deleteCartItem = async (
     const cart = await db
         .delete(cartItemTable)
         .where(eq(cartItemTable.id, itemId))
+        .returning()
         .execute();
 
     return successResponse(res, cart, 204, "Item deleted successfully");
@@ -95,6 +120,7 @@ export const clearCart = async (req: Request, res: Response): Promise<any> => {
     const cart = await db
         .delete(cartItemTable)
         .where(eq(cartItemTable.cartId, cartId))
+        .returning()
         .execute();
 
     return successResponse(res, cart, 204, "Cart cleared successfully");
@@ -133,14 +159,20 @@ export const getCartTotal = async (
     );
 };
 
-export const createCartForUser = async (req: IRequestWithLocal, res: Response, next: NextFunction) => {
+export const createCartForUser = async (
+    req: IRequestWithLocal,
+    res: Response,
+    next: NextFunction,
+) => {
     const user: SelectUser = req.local?.user;
 
     if (!user) {
-        new Error("createCartForUser expects user to be in the request.local object");
+        new Error(
+            "createCartForUser expects user to be in the request.local object",
+        );
     }
 
-    await db.insert(cartTable).values({ userId: user.id}).execute();
+    await db.insert(cartTable).values({ userId: user.id }).execute();
 
     next();
-}
+};

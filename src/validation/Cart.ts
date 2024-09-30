@@ -5,21 +5,15 @@ import {
     isProductExists,
     isUserExists,
 } from "../controllers/utils";
+import { customUUID } from "./utils";
 
-export const cartSchema = {
+const bodySchema = {
     retrieveCart: z.object({}),
     addCartItem: z.object({
-        productId: z
-            .string({
-                required_error: "productId is required.",
-                invalid_type_error: "productId must be a string.",
-            })
-            .uuid({
-                message: "productId must be a valid UUID.",
-            })
-            .refine(isProductExists, {
-                message: "Product not found.",
-            }),
+        productId: customUUID({
+            fieldName: "productId",
+            refineFn: isProductExists,
+        }),
         quantity: z
             .number({
                 required_error: "quantity is required.",
@@ -46,105 +40,51 @@ export const cartSchema = {
     getCartTotal: z.object({}),
 };
 
-export const paramsSchema = {
+const paramsSchema = {
     retrieveCart: z.object({
-        userId: z
-            .string({
-                required_error: "userId is required.",
-                invalid_type_error: "userId must be a string.",
-            })
-            .uuid({
-                message: "userId must be a valid UUID.",
-            })
-            .refine(isUserExists, {
-                message: "User not found.",
-            }),
+        userId: customUUID({
+            fieldName: "userId",
+            refineFn: isUserExists,
+        }),
     }),
     addCartItem: z.object({
-        cartId: z
-            .string({
-                required_error: "cartId is required.",
-                invalid_type_error: "cartId must be a string.",
-            })
-            .uuid({
-                message: "cartId must be a valid UUID.",
-            })
-            .refine(isCartExists, {
-                message: "Cart not found.",
-            }),
+        cartId: customUUID({
+            fieldName: "cartId",
+            refineFn: isCartExists,
+        }),
     }),
     updateCartItem: z.object({
-        cartId: z
-            .string({
-                required_error: "cartId is required.",
-                invalid_type_error: "cartId must be a string.",
-            })
-            .uuid({
-                message: "cartId must be a valid UUID.",
-            })
-            .refine(isCartExists, {
-                message: "Cart not found.",
-            }),
-        itemId: z
-            .string({
-                required_error: "itemId is required.",
-                invalid_type_error: "itemId must be a string.",
-            })
-            .uuid({
-                message: "itemId must be a valid UUID.",
-            })
-            .refine(isCartItemExists, {
-                message: "Cart item not found.",
-            }),
+        cartId: customUUID({
+            fieldName: "cartId",
+            refineFn: isCartExists,
+        }),
+        itemId: customUUID({
+            fieldName: "itemId",
+            refineFn: isCartItemExists,
+        }),
     }),
     deleteCartItem: z.object({
-        cartId: z
-            .string({
-                required_error: "cartId is required.",
-                invalid_type_error: "cartId must be a string.",
-            })
-            .uuid({
-                message: "cartId must be a valid UUID.",
-            })
-            .refine(isCartExists, {
-                message: "Cart not found.",
-            }),
-        itemId: z
-            .string({
-                required_error: "itemId is required.",
-                invalid_type_error: "itemId must be a string.",
-            })
-            .uuid({
-                message: "itemId must be a valid UUID.",
-            })
-            .refine(isCartItemExists, {
-                message: "Cart item not found.",
-            }),
+        cartId: customUUID({
+            fieldName: "cartId",
+            refineFn: isCartExists,
+        }),
+        itemId: customUUID({
+            fieldName: "itemId",
+            refineFn: isCartItemExists,
+        }),
     }),
     clearCart: z.object({
-        cartId: z
-            .string({
-                required_error: "cartId is required.",
-                invalid_type_error: "cartId must be a string.",
-            })
-            .uuid({
-                message: "cartId must be a valid UUID.",
-            })
-            .refine(isCartExists, {
-                message: "Cart not found.",
-            }),
+        cartId: customUUID({
+            fieldName: "cartId",
+            refineFn: isCartExists,
+        }),
     }),
     getCartTotal: z.object({
-        cartId: z
-            .string({
-                required_error: "cartId is required.",
-                invalid_type_error: "cartId must be a string.",
-            })
-            .uuid({
-                message: "cartId must be a valid UUID.",
-            })
-            .refine(isCartExists, {
-                message: "Cart not found.",
-            }),
+        cartId: customUUID({
+            fieldName: "cartId",
+            refineFn: isCartExists,
+        }),
     }),
 };
+
+export const cartSchema = { bodySchema, paramsSchema };
