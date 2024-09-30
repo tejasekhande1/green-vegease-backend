@@ -15,16 +15,20 @@ const router = express.Router();
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             required:
  *               - categoryName
+ *               - image
  *             properties:
  *               categoryName:
  *                 type: string
  *                 description: The name of the category to create.
  *                 example: "fruits"
+ *               image:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       200:
  *         description: Category created successfully.
