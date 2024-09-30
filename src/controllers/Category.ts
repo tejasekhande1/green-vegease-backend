@@ -2,15 +2,24 @@ import { Request, Response } from "express";
 import db from "../config/database";
 import { categoryTable, insertCategory } from "../schema/Category";
 import { eq } from "drizzle-orm";
+import { config } from "../config/config";
+import { uploadToCloudinary } from "../services/uploadImage";
 
-
-export const createCategory = async (req: Request, res: Response): Promise<Response> => {
+export const createCategory = async (
+    req: Request,
+    res: Response,
+): Promise<Response> => {
     const { categoryName } = req.body;
+    const { folder } = config.cloudinary;
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    const imageFile = files["image"];
+    let category;
 
     try {
-        const [existingCategory] = await db.select({
-            category_name: categoryTable.categoryName
-        })
+        const [existingCategory] = await db
+            .select({
+                category_name: categoryTable.categoryName,
+            })
             .from(categoryTable)
             .where(eq(categoryTable.categoryName, categoryName));
 
@@ -21,30 +30,46 @@ export const createCategory = async (req: Request, res: Response): Promise<Respo
             });
         }
 
-        const category = await insertCategory({
-            categoryName: categoryName
-        })
+        const imageUrl = await uploadToCloudinary(
+            imageFile,
+            folder,
+            1000,
+            1000,
+        );
 
+        if (!imageUrl) {
+            throw new Error("Image upload failed");
+        }
+
+        category = await insertCategory({
+            categoryName: categoryName,
+            image: imageUrl,
+        });
     } catch (error) {
         res.status(500).json({
             success: false,
             message: "Failed to create category.",
-        })
+        });
     }
     return res.status(200).json({
         success: true,
-        message: "Category created successfully."
+        message: "Category created successfully.",
+        data: category,
     });
-}
+};
 
-export const updateCategory = async (req: Request, res: Response): Promise<Response> => {
+export const updateCategory = async (
+    req: Request,
+    res: Response,
+): Promise<Response> => {
     const { id } = req.params;
     const { categoryName } = req.body;
 
     try {
-        const [existingCategory] = await db.select({
-            categoryName: categoryTable.categoryName
-        })
+        const [existingCategory] = await db
+            .select({
+                categoryName: categoryTable.categoryName,
+            })
             .from(categoryTable)
             .where(eq(categoryTable.categoryName, categoryName));
 
@@ -54,10 +79,17 @@ export const updateCategory = async (req: Request, res: Response): Promise<Respo
                 message: "Category with this name already exists",
             });
         }
-
-        const updatedCategory = await db.update(categoryTable)
+        
+        const [updatedCategory] = await db
+            .update(categoryTable)
             .set({ categoryName: categoryName })
-            .where(eq(categoryTable.id, id));
+            .where(eq(categoryTable.id, id))
+            .returning({
+                id: categoryTable.id,
+                categoryName: categoryTable.categoryName,
+                categoryImage: categoryTable.image,
+            });
+;
 
         if (!updatedCategory) {
             return res.status(404).json({
@@ -69,8 +101,8 @@ export const updateCategory = async (req: Request, res: Response): Promise<Respo
         return res.status(200).json({
             success: true,
             message: "Category updated successfully.",
+            data: updatedCategory,
         });
-
     } catch (error) {
         return res.status(500).json({
             success: false,
@@ -79,11 +111,15 @@ export const updateCategory = async (req: Request, res: Response): Promise<Respo
     }
 };
 
-export const deleteCategory = async (req: Request, res: Response): Promise<Response> => {
+export const deleteCategory = async (
+    req: Request,
+    res: Response,
+): Promise<Response> => {
     const { id } = req.params;
 
     try {
-        const [deletedCategory] = await db.delete(categoryTable)
+        const [deletedCategory] = await db
+            .delete(categoryTable)
             .where(eq(categoryTable.id, id));
 
         if (!deletedCategory) {
@@ -97,7 +133,6 @@ export const deleteCategory = async (req: Request, res: Response): Promise<Respo
             success: true,
             message: "Category deleted successfully.",
         });
-
     } catch (error) {
         return res.status(500).json({
             success: false,
@@ -106,7 +141,10 @@ export const deleteCategory = async (req: Request, res: Response): Promise<Respo
     }
 };
 
-export const getAllCategories = async (req: Request, res: Response): Promise<Response> => {
+export const getAllCategories = async (
+    req: Request,
+    res: Response,
+): Promise<Response> => {
     try {
         const categories = await db.select().from(categoryTable);
 
@@ -121,7 +159,6 @@ export const getAllCategories = async (req: Request, res: Response): Promise<Res
             success: true,
             data: categories,
         });
-
     } catch (error) {
         return res.status(500).json({
             success: false,
