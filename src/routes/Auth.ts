@@ -39,6 +39,8 @@ const router = express.Router();
  *                 type: string
  *               confirmedPassword:
  *                 type: string
+ *               isRequestedForDeliveryBoy:
+ *                 type: boolean
  *     responses:
  *       201:
  *         description: User registered successfully
