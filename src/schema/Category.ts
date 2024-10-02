@@ -9,9 +9,3 @@ export const categoryTable = pgTable("category", {
 
 export type InsertCategory = typeof categoryTable.$inferInsert;
 export type SelectCategory = typeof categoryTable.$inferSelect;
-
-export async function insertCategory(
-    category: InsertCategory,
-): Promise<SelectCategory[]> {
-    return db.insert(categoryTable).values(category).returning();
-}
