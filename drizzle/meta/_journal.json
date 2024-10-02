@@ -8,6 +8,20 @@
       "when": 1727878103175,
       "tag": "0000_serious_nemesis",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1727724457691,
+      "tag": "0006_breezy_silver_fox",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1727804521495,
+      "tag": "0007_jazzy_ser_duncan",
+      "breakpoints": true
     }
   ]
 }

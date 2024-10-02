@@ -4,6 +4,7 @@ import { AuthRequestSchemas } from "./Auth";
 import { CategorySchema } from "./Category";
 import { ProductSchema } from "./Product";
 import { cartSchema } from "./Cart";
+import { DeliveryBoyRequestSchema } from "./DeliveryBoyRequest";
 
 const ValidateZod = (
     schema: z.ZodObject<any>,
@@ -35,6 +36,7 @@ const RequestSchemas = {
     category: CategorySchema,
     product: ProductSchema,
     cart: cartSchema.bodySchema,
+    deliveryBoyRequest: DeliveryBoyRequestSchema,
 };
 
 const ParamsSchemas = {

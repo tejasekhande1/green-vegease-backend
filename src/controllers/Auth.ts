@@ -4,8 +4,9 @@ import jwt from "jsonwebtoken";
 import { eq, or } from "drizzle-orm";
 
 import db from "../config/database";
-import { userTable } from "../schema/Auth";
 import { insertUser } from "../schema/utils";
+import { UserRoleEnum, userTable } from "../schema/Auth";
+import { insertDeliveryBoyRequest } from "../schema/DeliveryBoyRequests";
 import {
     createVerificationSMS,
     createVerificationCheck,
@@ -13,28 +14,24 @@ import {
 } from "../library/SMSVerification";
 import { IRequestWithLocal } from "../library/types";
 import { successResponse } from "./utils";
+import { generateProfilePictureUrl } from "../services/Auth";
+import { date } from "drizzle-orm/mysql-core";
 
 export const signUp = async (
     req: Request,
     res: Response,
-    next: NextFunction,
-): Promise<any> => {
-    const {
-        firstname,
-        lastname,
-        username,
-        mobileNumber,
-        email,
-        password,
-        confirmedPassword,
-    } = req.body;
-
-    if (password !== confirmedPassword) {
-        return res.status(400).json({
-            success: false,
-            message: "Passwords do not match, please try again",
-        });
-    }
+): Promise<Response> => {
+    try {
+        const {
+            firstname,
+            lastname,
+            username,
+            mobileNumber,
+            email,
+            password,
+            confirmedPassword,
+            isRequestedForDeliveryBoy,
+        } = req.body;
 
     const existingUser = await db
         .select({
@@ -49,13 +46,81 @@ export const signUp = async (
             ),
         );
 
-    if (existingUser.length !== 0) {
-        const message =
-            existingUser[0].email === email
-                ? "Email address is already registered"
-                : "Mobile number is already registered";
+        const existingUser = await db
+            .select({
+                email: userTable.email,
+                mobileNumber: userTable.mobileNumber,
+            })
+            .from(userTable)
+            .where(
+                or(
+                    eq(userTable.email, email),
+                    eq(userTable.mobileNumber, mobileNumber),
+                ),
+            );
 
-        return res.status(400).json({
+        if (existingUser.length !== 0) {
+            const message =
+                existingUser[0].email === email
+                    ? "Email address is already registered"
+                    : "Mobile number is already registered";
+
+            return res.status(400).json({
+                success: false,
+                message,
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const profilePicture = generateProfilePictureUrl(firstname, lastname);
+
+        if (isRequestedForDeliveryBoy) {
+            const deliveryBoy = await insertDeliveryBoyRequest({
+                email: email,
+                password: hashedPassword,
+                username: username,
+                firstName: firstname,
+                lastName: lastname,
+                mobileNumber: mobileNumber,
+                profilePicture: profilePicture,
+            });
+
+            return res.status(200).json({
+                success: true,
+                message: "Delivery boy request send successfully",
+                user: {
+                    first_name: deliveryBoy[0].firstName,
+                    last_name: deliveryBoy[0].lastName,
+                    email: deliveryBoy[0].email,
+                    mobile_number: deliveryBoy[0].mobileNumber,
+                    profile_picture: deliveryBoy[0].profilePicture,
+                },
+            });
+        } else {
+            const user = await insertUser({
+                email: email,
+                password: hashedPassword,
+                username: username,
+                firstName: firstname,
+                lastName: lastname,
+                mobileNumber: mobileNumber,
+                profilePicture: profilePicture,
+            });
+
+            return res.status(200).json({
+                success: true,
+                message: "User registered successfully",
+                user: {
+                    first_name: user[0].firstName,
+                    last_name: user[0].lastName,
+                    email: user[0].email,
+                    mobile_number: user[0].mobileNumber,
+                    profile_picture: user[0].profilePicture,
+                },
+            });
+        }
+    } catch (error) {
+        return res.status(500).json({
             success: false,
             message,
         });

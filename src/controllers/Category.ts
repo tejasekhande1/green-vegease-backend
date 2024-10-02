@@ -12,7 +12,16 @@ export const createCategory = async (
 ): Promise<Response> => {
     const { categoryName } = req.body;
     const { folder } = config.cloudinary;
+    
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+    if (!files || !files["image"]) {
+        return res.status(400).json({
+            success: false,
+            message: "No image file provided",
+        });
+    }
+
     const imageFile = files["image"];
     let category;
 
