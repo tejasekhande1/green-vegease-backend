@@ -21,8 +21,6 @@ export const acceptOrDeclineDeliveryBoyStatus = async (
             .from(deliveryBoyRequestsTable)
             .where(eq(deliveryBoyRequestsTable.id, id));
 
-        console.log(deliveryBoyRequest);
-
         if (!deliveryBoyRequest) {
             return res.status(404).json({
                 success: false,
