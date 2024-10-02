@@ -5,7 +5,7 @@ import {
     DeliveryBoyRequestStatusEnum,
 } from "../schema/DeliveryBoyRequests";
 import bcrypt from "bcrypt";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { InsertUser, insertUser, UserRoleEnum } from "../schema/Auth";
 
 export const acceptOrDeclineDeliveryBoyStatus = async (
@@ -74,6 +74,7 @@ export const getPendingDeliveryBoyRequests = async (
                 mobile_number: deliveryBoyRequestsTable.mobileNumber,
                 profile_picture: deliveryBoyRequestsTable.profilePicture,
                 status: deliveryBoyRequestsTable.requestStatus,
+                requested_at: deliveryBoyRequestsTable.requestedAt,
             })
             .from(deliveryBoyRequestsTable)
             .where(
@@ -81,7 +82,9 @@ export const getPendingDeliveryBoyRequests = async (
                     deliveryBoyRequestsTable.requestStatus,
                     DeliveryBoyRequestStatusEnum.PENDING,
                 ),
-            );
+            )
+            .orderBy(desc(deliveryBoyRequestsTable.requestedAt)); 
+
 
         return res.status(200).json({
             success: true,
