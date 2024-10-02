@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
   "id": "3c7c142f-9735-4605-8ec1-1bc6c23f54f0",
+=======
+  "id": "1ed0644c-5172-4cd2-b549-b6bfa051db8c",
+>>>>>>> dev
   "prevId": "3a3efbe3-f531-4153-a893-5cfd652a5fe7",
   "version": "7",
   "dialect": "postgresql",
@@ -92,6 +96,7 @@
         }
       }
     },
+<<<<<<< HEAD
     "public.cart_item": {
       "name": "cart_item",
       "schema": "",
@@ -251,6 +256,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+=======
+>>>>>>> dev
     "public.category": {
       "name": "category",
       "schema": "",
@@ -267,6 +274,15 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
+<<<<<<< HEAD
+=======
+        },
+        "image": {
+          "name": "image",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+>>>>>>> dev
         }
       },
       "indexes": {},

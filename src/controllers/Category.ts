@@ -3,12 +3,18 @@ import db from "../config/database";
 import { categoryTable } from "../schema/Category";
 import { insertCategory } from "../schema/utils";
 import { eq } from "drizzle-orm";
+import { config } from "../config/config";
+import { uploadToCloudinary } from "../services/uploadImage";
 
 export const createCategory = async (
     req: Request,
     res: Response,
 ): Promise<Response> => {
     const { categoryName } = req.body;
+    const { folder } = config.cloudinary;
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    const imageFile = files["image"];
+    let category;
 
     try {
         const [existingCategory] = await db
@@ -25,8 +31,20 @@ export const createCategory = async (
             });
         }
 
-        const category = await insertCategory({
+        const imageUrl = await uploadToCloudinary(
+            imageFile,
+            folder,
+            1000,
+            1000,
+        );
+
+        if (!imageUrl) {
+            throw new Error("Image upload failed");
+        }
+
+        category = await insertCategory({
             name: categoryName,
+            image: imageUrl,
         });
     } catch (error) {
         res.status(500).json({
@@ -37,6 +55,7 @@ export const createCategory = async (
     return res.status(200).json({
         success: true,
         message: "Category created successfully.",
+        data: category,
     });
 };
 
@@ -62,10 +81,15 @@ export const updateCategory = async (
             });
         }
 
-        const updatedCategory = await db
+        const [updatedCategory] = await db
             .update(categoryTable)
             .set({ name: categoryName })
-            .where(eq(categoryTable.id, id));
+            .where(eq(categoryTable.id, id))
+            .returning({
+                id: categoryTable.id,
+                categoryName: categoryTable.name,
+                categoryImage: categoryTable.image,
+            });
 
         if (!updatedCategory) {
             return res.status(404).json({
@@ -77,6 +101,7 @@ export const updateCategory = async (
         return res.status(200).json({
             success: true,
             message: "Category updated successfully.",
+            data: updatedCategory,
         });
     } catch (error) {
         return res.status(500).json({
