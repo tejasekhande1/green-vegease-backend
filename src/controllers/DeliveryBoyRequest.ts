@@ -61,6 +61,42 @@ export const acceptOrDeclineDeliveryBoyStatus = async (
     }
 };
 
+export const getPendingDeliveryBoyRequests = async (
+    req: Request,
+    res: Response,
+): Promise<Response> => {
+    try {
+        const deliveryBoyPendingRequests = await db
+            .select({
+                id: deliveryBoyRequestsTable.id,
+                first_name: deliveryBoyRequestsTable.firstName,
+                last_name: deliveryBoyRequestsTable.lastName,
+                mobile_number: deliveryBoyRequestsTable.mobileNumber,
+                profile_picture: deliveryBoyRequestsTable.profilePicture,
+                status: deliveryBoyRequestsTable.requestStatus,
+            })
+            .from(deliveryBoyRequestsTable)
+            .where(
+                eq(
+                    deliveryBoyRequestsTable.requestStatus,
+                    DeliveryBoyRequestStatusEnum.PENDING,
+                ),
+            );
+
+        return res.status(200).json({
+            success: true,
+            message: "Pending delivery boy request fetched successfully",
+            data: deliveryBoyPendingRequests,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Error while fetching delivery boy request",
+            error: (error as Error).message,
+        });
+    }
+};
+
 const updateDeliveryBoyStatus = async (
     id: string,
     status: DeliveryBoyRequestStatusEnum,
