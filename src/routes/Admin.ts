@@ -1,6 +1,7 @@
 import express from "express";
 import { acceptOrDeclineDeliveryBoyStatus } from "../controllers/DeliveryBoyRequest";
 import { RequestSchemas, ValidateZod } from "../validation/utils";
+import { getPendingDeliveryBoyRequests } from "../controllers/DeliveryBoyRequest";
 
 const router = express.Router();
 
@@ -81,5 +82,7 @@ router.put(
     ),
     acceptOrDeclineDeliveryBoyStatus,
 );
+
+router.get("/pending-delivery-boy-requests", getPendingDeliveryBoyRequests);
 
 export default router;
