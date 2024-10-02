@@ -8,6 +8,7 @@ import { cloudinaryConnect } from "./config/cloudinary";
 import authRoutes from "./routes/Auth";
 import categoryRoutes from "./routes/Category";
 import productRoutes from "./routes/Product";
+import cartRoutes from "./routes/Cart";
 import adminRoutes from './routes/Admin';
 import userRoutes from "./routes/User";
 import swaggerSpec from "./config/swagger";
@@ -77,6 +78,7 @@ const startServer = () => {
     app.use("/api/v1/auth", authRoutes);
     app.use("/api/v1/category", categoryRoutes);
     app.use("/api/v1/product",productRoutes);
+    app.use("/api/v1/cart", cartRoutes);
     app.use("/api/v1/admin",adminRoutes);
     app.use("/api/v1/user", userRoutes);
 

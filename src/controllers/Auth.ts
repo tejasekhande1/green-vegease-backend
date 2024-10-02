@@ -1,16 +1,19 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { eq, or } from "drizzle-orm";
 
 import db from "../config/database";
-import { insertUser, UserRoleEnum, userTable } from "../schema/Auth";
+import { insertUser } from "../schema/utils";
+import { UserRoleEnum, userTable } from "../schema/Auth";
 import { insertDeliveryBoyRequest } from "../schema/DeliveryBoyRequests";
 import {
     createVerificationSMS,
     createVerificationCheck,
     SMSVerificationStatus,
 } from "../library/SMSVerification";
+import { IRequestWithLocal } from "../library/types";
+import { successResponse } from "./utils";
 import { generateProfilePictureUrl } from "../services/Auth";
 import { date } from "drizzle-orm/mysql-core";
 
@@ -30,12 +33,18 @@ export const signUp = async (
             isRequestedForDeliveryBoy,
         } = req.body;
 
-        if (password !== confirmedPassword) {
-            return res.status(400).json({
-                success: false,
-                message: "Passwords do not match, please try again",
-            });
-        }
+    const existingUser = await db
+        .select({
+            email: userTable.email,
+            mobileNumber: userTable.mobileNumber,
+        })
+        .from(userTable)
+        .where(
+            or(
+                eq(userTable.email, email),
+                eq(userTable.mobileNumber, mobileNumber),
+            ),
+        );
 
         const existingUser = await db
             .select({
@@ -113,10 +122,26 @@ export const signUp = async (
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: "Error while registering user",
-            error: (error as Error).message,
+            message,
         });
     }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await insertUser({
+        email: email,
+        password: hashedPassword,
+        username: username,
+        firstName: firstname,
+        lastName: lastname,
+        mobileNumber: mobileNumber,
+        profilePicture: `https://api.dicebear.com/7.x/initials/svg?seed=${firstname} ${lastname}`,
+    });
+
+    (req as IRequestWithLocal).local = {};
+    (req as IRequestWithLocal).local.user = user[0];
+
+    next();
 };
 
 export const login = async (req: Request, res: Response): Promise<Response> => {
@@ -277,4 +302,31 @@ export const verifySMSCode = async (req: Request, res: Response) => {
     return res.status(400).json({
         message: "Verification unsuccessful",
     });
+};
+
+export const responseWithUser = (
+    req: IRequestWithLocal,
+    res: Response,
+    next: NextFunction,
+) => {
+    const user = req.local.user;
+
+    if (!user) {
+        new Error(
+            "responseWithUser expects user to be in the request.local object",
+        );
+    }
+
+    return successResponse(
+        res,
+        {
+            first_name: user.firstName,
+            last_name: user.lastName,
+            email: user.email,
+            mobile_number: user.mobileNumber,
+            profile_picture: user.profilePicture,
+        },
+        201,
+        "User created successfully",
+    );
 };

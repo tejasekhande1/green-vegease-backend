@@ -14,7 +14,7 @@ export const ProductSchema = {
             required_error: "price is required.",
         }),
         quantityInKg: z.number({
-            required_error: "Product quantity must be required.",
+            required_error: "quantityInKg must be required.",
         }),
         categoryId: z.string().uuid("Invalid category ID format").optional(),
     }),

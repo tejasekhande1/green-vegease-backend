@@ -1,5 +1,7 @@
-import { drizzle, PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+
+import * as schema from "../schema";
 
 const POSTGRES_URL = process.env.POSTGRES_URL as string;
 if (!POSTGRES_URL) {
@@ -8,8 +10,7 @@ if (!POSTGRES_URL) {
 
 console.log(POSTGRES_URL);
 
-
 const queryClient = postgres(POSTGRES_URL);
-const db:  PostgresJsDatabase = drizzle(queryClient);
+const db = drizzle(queryClient, { schema });
 
 export default db;

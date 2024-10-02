@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import db from "../config/database";
-import { categoryTable, insertCategory } from "../schema/Category";
+import { categoryTable } from "../schema/Category";
+import { insertCategory } from "../schema/utils";
 import { eq } from "drizzle-orm";
 import { config } from "../config/config";
 import { uploadToCloudinary } from "../services/uploadImage";
@@ -27,10 +28,10 @@ export const createCategory = async (
     try {
         const [existingCategory] = await db
             .select({
-                category_name: categoryTable.categoryName,
+                category_name: categoryTable.name,
             })
             .from(categoryTable)
-            .where(eq(categoryTable.categoryName, categoryName));
+            .where(eq(categoryTable.name, categoryName));
 
         if (existingCategory) {
             return res.status(400).json({
@@ -51,7 +52,7 @@ export const createCategory = async (
         }
 
         category = await insertCategory({
-            categoryName: categoryName,
+            name: categoryName,
             image: imageUrl,
         });
     } catch (error) {
@@ -77,10 +78,10 @@ export const updateCategory = async (
     try {
         const [existingCategory] = await db
             .select({
-                categoryName: categoryTable.categoryName,
+                name: categoryTable.name,
             })
             .from(categoryTable)
-            .where(eq(categoryTable.categoryName, categoryName));
+            .where(eq(categoryTable.name, categoryName));
 
         if (existingCategory) {
             return res.status(400).json({
@@ -88,17 +89,16 @@ export const updateCategory = async (
                 message: "Category with this name already exists",
             });
         }
-        
+
         const [updatedCategory] = await db
             .update(categoryTable)
-            .set({ categoryName: categoryName })
+            .set({ name: categoryName })
             .where(eq(categoryTable.id, id))
             .returning({
                 id: categoryTable.id,
-                categoryName: categoryTable.categoryName,
+                categoryName: categoryTable.name,
                 categoryImage: categoryTable.image,
             });
-;
 
         if (!updatedCategory) {
             return res.status(404).json({

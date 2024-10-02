@@ -6,12 +6,11 @@ import {
     timestamp,
     integer,
 } from "drizzle-orm/pg-core";
-import db from "../config/database";
 import { categoryTable } from "./Category";
 
 export const productTable = pgTable("product", {
     id: uuid("id").primaryKey().defaultRandom(),
-    productName: varchar("product_name", { length: 255 }).notNull(),
+    name: varchar("product_name", { length: 255 }).notNull(),
     description: text("description"),
     price: integer("price").notNull(),
     images: text("images"),
@@ -26,8 +25,3 @@ export const productTable = pgTable("product", {
 export type InsertProduct = typeof productTable.$inferInsert;
 export type SelectProduct = typeof productTable.$inferSelect;
 
-export async function insertProduct(
-    product: InsertProduct,
-): Promise<SelectProduct[]> {
-    return db.insert(productTable).values(product).returning();
-}

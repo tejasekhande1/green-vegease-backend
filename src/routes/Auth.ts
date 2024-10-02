@@ -5,8 +5,11 @@ import {
     resetPassword,
     sendVerificationSMS,
     verifySMSCode,
+    responseWithUser,
 } from "../controllers/Auth";
 import { RequestSchemas, ValidateZod } from "../validation/utils";
+import { asyncErrorHandler } from "../controllers/utils";
+import { createCartForUser } from "../controllers/Cart";
 
 const router = express.Router();
 
@@ -49,7 +52,13 @@ const router = express.Router();
  *       500:
  *         description: Internal server error
  */
-router.post("/signup", ValidateZod(RequestSchemas.auth.signUp), signUp);
+router.post(
+    "/signup",
+    ValidateZod(RequestSchemas.auth.signUp),
+    asyncErrorHandler(signUp),
+    asyncErrorHandler(createCartForUser),
+    asyncErrorHandler(responseWithUser),
+);
 
 /**
  * @openapi

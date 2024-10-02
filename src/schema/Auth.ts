@@ -1,13 +1,23 @@
-import { text, timestamp, pgTable, uuid, varchar, pgEnum } from "drizzle-orm/pg-core";
-import db from "../config/database";
+import {
+    text,
+    timestamp,
+    pgTable,
+    uuid,
+    varchar,
+    pgEnum,
+} from "drizzle-orm/pg-core";
 
 export enum UserRoleEnum {
     ADMIN = "admin",
     CUSTOMER = "customer",
-    DELIVERY_BOY="delivery-boy"
+    DELIVERY_BOY = "delivery-boy",
 }
 
-export const userRoleEnum = pgEnum("user_role", ["admin", "customer","delivery-boy"]);
+export const userRoleEnum = pgEnum("user_role", [
+    "admin",
+    "customer",
+    "delivery-boy",
+]);
 
 export const userTable = pgTable("user", {
     id: uuid("id").primaryKey().defaultRandom(),
@@ -20,12 +30,11 @@ export const userTable = pgTable("user", {
     role: userRoleEnum("role").default(UserRoleEnum.CUSTOMER),
     profilePicture: text("profile_picture"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
-    updatedAt: timestamp("updated_at").notNull().$onUpdate(() => new Date()),
+    updatedAt: timestamp("updated_at")
+        .notNull()
+        .$onUpdate(() => new Date()),
 });
 
 export type InsertUser = typeof userTable.$inferInsert;
 export type SelectUser = typeof userTable.$inferSelect;
 
-export async function insertUser(user: InsertUser): Promise<SelectUser[]> {
-    return db.insert(userTable).values(user).returning();
-}
