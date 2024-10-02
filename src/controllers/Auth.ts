@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { eq, or } from "drizzle-orm";
 
 import db from "../config/database";
-import { insertUser, userTable } from "../schema/Auth";
+import { insertUser, UserRoleEnum, userTable } from "../schema/Auth";
 import { insertDeliveryBoyRequest } from "../schema/DeliveryBoyRequests";
 import {
     createVerificationSMS,
@@ -12,6 +12,7 @@ import {
     SMSVerificationStatus,
 } from "../library/SMSVerification";
 import { generateProfilePictureUrl } from "../services/Auth";
+import { date } from "drizzle-orm/mysql-core";
 
 export const signUp = async (
     req: Request,
