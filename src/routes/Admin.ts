@@ -1,5 +1,6 @@
 import express from "express";
 import { acceptOrDeclineDeliveryBoyStatus } from "../controllers/DeliveryBoyRequest";
+import { RequestSchemas, ValidateZod } from "../validation/utils";
 
 const router = express.Router();
 
@@ -73,6 +74,12 @@ const router = express.Router();
  *                   type: string
  *                   example: Some server error message
  */
-router.put("/delivery-boy-status/:id", acceptOrDeclineDeliveryBoyStatus);
+router.put(
+    "/delivery-boy-status/:id",
+    ValidateZod(
+        RequestSchemas.deliveryBoyRequest.acceptOrDeclineDeliveryBoyRequest,
+    ),
+    acceptOrDeclineDeliveryBoyStatus,
+);
 
 export default router;
