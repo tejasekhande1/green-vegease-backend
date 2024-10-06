@@ -22,6 +22,13 @@
       "when": 1727804521495,
       "tag": "0007_jazzy_ser_duncan",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1728197129714,
+      "tag": "0008_low_kitty_pryde",
+      "breakpoints": true
     }
   ]
 }
