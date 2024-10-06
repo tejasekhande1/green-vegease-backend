@@ -5,7 +5,7 @@ import { eq, or } from "drizzle-orm";
 
 import db from "../config/database";
 import { insertUser } from "../schema/utils";
-import { UserRoleEnum, userTable } from "../schema/Auth";
+import { userTable } from "../schema/Auth";
 import { insertDeliveryBoyRequest } from "../schema/DeliveryBoyRequests";
 import {
     createVerificationSMS,
@@ -15,12 +15,12 @@ import {
 import { IRequestWithLocal } from "../library/types";
 import { successResponse } from "./utils";
 import { generateProfilePictureUrl } from "../services/Auth";
-import { date } from "drizzle-orm/mysql-core";
 
 export const signUp = async (
     req: Request,
     res: Response,
-): Promise<Response> => {
+    next: NextFunction,
+): Promise<Response | void> => {
     try {
         const {
             firstname,
@@ -29,22 +29,8 @@ export const signUp = async (
             mobileNumber,
             email,
             password,
-            confirmedPassword,
             isRequestedForDeliveryBoy,
         } = req.body;
-
-    const existingUser = await db
-        .select({
-            email: userTable.email,
-            mobileNumber: userTable.mobileNumber,
-        })
-        .from(userTable)
-        .where(
-            or(
-                eq(userTable.email, email),
-                eq(userTable.mobileNumber, mobileNumber),
-            ),
-        );
 
         const existingUser = await db
             .select({
@@ -107,41 +93,17 @@ export const signUp = async (
                 profilePicture: profilePicture,
             });
 
-            return res.status(200).json({
-                success: true,
-                message: "User registered successfully",
-                user: {
-                    first_name: user[0].firstName,
-                    last_name: user[0].lastName,
-                    email: user[0].email,
-                    mobile_number: user[0].mobileNumber,
-                    profile_picture: user[0].profilePicture,
-                },
-            });
+            (req as IRequestWithLocal).local = {};
+            (req as IRequestWithLocal).local.user = user[0];
+        
+            next();
         }
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message,
+            message: "Internal server error",
         });
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await insertUser({
-        email: email,
-        password: hashedPassword,
-        username: username,
-        firstName: firstname,
-        lastName: lastname,
-        mobileNumber: mobileNumber,
-        profilePicture: `https://api.dicebear.com/7.x/initials/svg?seed=${firstname} ${lastname}`,
-    });
-
-    (req as IRequestWithLocal).local = {};
-    (req as IRequestWithLocal).local.user = user[0];
-
-    next();
 };
 
 export const login = async (req: Request, res: Response): Promise<Response> => {

@@ -6,7 +6,8 @@ import {
 } from "../schema/DeliveryBoyRequests";
 import bcrypt from "bcrypt";
 import { desc, eq } from "drizzle-orm";
-import { InsertUser, insertUser, UserRoleEnum } from "../schema/Auth";
+import { InsertUser, UserRoleEnum } from "../schema/Auth";
+import { insertUser } from "../schema/utils";
 
 export const acceptOrDeclineDeliveryBoyStatus = async (
     req: Request,
