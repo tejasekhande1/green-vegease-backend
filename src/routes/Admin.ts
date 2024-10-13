@@ -2,6 +2,7 @@ import express from "express";
 import { acceptOrDeclineDeliveryBoyStatus } from "../controllers/DeliveryBoyRequest";
 import { RequestSchemas, ValidateZod } from "../validation/utils";
 import { getPendingDeliveryBoyRequests } from "../controllers/DeliveryBoyRequest";
+import { authorization, isAdmin } from "../library/authorization";
 
 const router = express.Router();
 
@@ -77,6 +78,8 @@ const router = express.Router();
  */
 router.put(
     "/delivery-boy-requests/:id/status",
+    authorization,
+    isAdmin,
     ValidateZod(
         RequestSchemas.deliveryBoyRequest.acceptOrDeclineDeliveryBoyRequest,
     ),
@@ -147,6 +150,11 @@ router.put(
  *                   type: string
  *                   example: "Internal server error"
  */
-router.get("/delivery-boy-requests/pending", getPendingDeliveryBoyRequests);
+router.get(
+    "/delivery-boy-requests/pending",
+    authorization,
+    isAdmin,
+    getPendingDeliveryBoyRequests,
+);
 
 export default router;

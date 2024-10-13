@@ -1,6 +1,12 @@
 import express from "express";
 import { RequestSchemas, ValidateZod } from "../validation/utils";
-import { createCategory, deleteCategory, getAllCategories, updateCategory } from "../controllers/Category";
+import {
+    createCategory,
+    deleteCategory,
+    getAllCategories,
+    updateCategory,
+} from "../controllers/Category";
+import { authorization } from "../library/authorization";
 
 const router = express.Router();
 
@@ -70,7 +76,12 @@ const router = express.Router();
  *                   type: string
  *                   example: "Failed to create category."
  */
-router.post('/', ValidateZod(RequestSchemas.category.category), createCategory);
+router.post(
+    "/",
+    authorization,
+    ValidateZod(RequestSchemas.category.category),
+    createCategory,
+);
 
 /**
  * @swagger
@@ -154,7 +165,12 @@ router.post('/', ValidateZod(RequestSchemas.category.category), createCategory);
  *                   type: string
  *                   example: "Failed to update category."
  */
-router.put('/:id', ValidateZod(RequestSchemas.category.category), updateCategory);
+router.put(
+    "/:id",
+    authorization,
+    ValidateZod(RequestSchemas.category.category),
+    updateCategory,
+);
 
 /**
  * @swagger
@@ -212,7 +228,7 @@ router.put('/:id', ValidateZod(RequestSchemas.category.category), updateCategory
  *                   type: string
  *                   example: "Failed to delete category."
  */
-router.delete('/:id', deleteCategory);
+router.delete("/:id", authorization, deleteCategory);
 
 /**
  * @swagger
@@ -271,6 +287,6 @@ router.delete('/:id', deleteCategory);
  *                   type: string
  *                   example: "Failed to retrieve categories."
  */
-router.get('/', getAllCategories);
+router.get("/", authorization, getAllCategories);
 
 export default router;

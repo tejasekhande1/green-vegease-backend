@@ -11,6 +11,7 @@ export const config = {
     },
     core: {
         serviceName: process.env.SERVICE_NAME as string,
+        jwtSecret: process.env.JWT_SECRET as string,
     },
     posgres: {
         url: process.env.POSTGRES_URL as string,

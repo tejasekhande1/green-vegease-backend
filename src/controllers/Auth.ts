@@ -5,7 +5,7 @@ import { eq, or } from "drizzle-orm";
 
 import db from "../config/database";
 import { insertUser } from "../schema/utils";
-import { userTable } from "../schema/Auth";
+import { UserRoleEnum, userTable } from "../schema/Auth";
 import { insertDeliveryBoyRequest } from "../schema/DeliveryBoyRequests";
 import {
     createVerificationSMS,
@@ -15,6 +15,7 @@ import {
 import { IRequestWithLocal } from "../library/types";
 import { successResponse } from "./utils";
 import { generateProfilePictureUrl } from "../services/Auth";
+import { generateAuthToken } from "../library/authorization";
 
 export const signUp = async (
     req: Request,
@@ -129,7 +130,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
         if (filteredUsers.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: "User not found.",
+                message: "Username or password is incorrect",
             });
         }
 
@@ -141,38 +142,19 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
         if (!isPasswordValid) {
             return res.status(401).json({
                 success: false,
-                message: "Invalid password.",
+                message: "Username or password is incorrect",
             });
         }
 
         const payload = {
             id: filteredUsers[0].id,
             email: filteredUsers[0].email,
-            role: filteredUsers[0].role,
+            role: filteredUsers[0].role as UserRoleEnum | null,
         };
 
-        const token = jwt.sign(payload, process.env.SECRET_KEY as string, {
-            expiresIn: "2h",
-        });
+        const token = generateAuthToken(payload);
 
-        const userResponse = {
-            ...filteredUsers[0],
-            password: undefined,
-            token,
-        };
-
-        const cookieOptions = {
-            expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-        };
-
-        return res.cookie("token", token, cookieOptions).status(200).json({
-            success: true,
-            token,
-            user: userResponse,
-            message: "User logged in successfully.",
-        });
+        return successResponse(res, { token }, 200, "User logged in successfully");
     } catch (error) {
         return res.status(500).json({
             success: false,

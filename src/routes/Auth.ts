@@ -88,9 +88,9 @@ router.post(
  *       400:
  *         description: Bad request
  *       401:
- *         description: Unauthorized
+ *         description: Username or password is incorrect
  *       404:
- *         description: User not found
+ *         description: Username or password is incorrect
  *       500:
  *         description: Internal server error
  */
