@@ -6,6 +6,7 @@ import {
     updateProduct,
 } from "../controllers/Product";
 import { RequestSchemas, ValidateZod } from "../validation/utils";
+import { authorization } from "../library/authorization";
 const router = express.Router();
 
 /**
@@ -116,7 +117,12 @@ const router = express.Router();
  *                   type: string
  *                   example: "Internal Server Error"
  */
-router.post("/", ValidateZod(RequestSchemas.product.addProduct), addProduct);
+router.post(
+    "/",
+    authorization,
+    ValidateZod(RequestSchemas.product.addProduct),
+    addProduct,
+);
 
 /**
  * @swagger
@@ -190,7 +196,7 @@ router.post("/", ValidateZod(RequestSchemas.product.addProduct), addProduct);
  *                   type: string
  *                   example: "Failed to fetch products"
  */
-router.get("/", getProducts);
+router.get("/", authorization, getProducts);
 
 /**
  * @swagger
@@ -249,7 +255,7 @@ router.get("/", getProducts);
  *                   type: string
  *                   example: "Failed to delete a product"
  */
-router.delete("/:id", deleteProduct);
+router.delete("/:id", authorization, deleteProduct);
 
 /**
  * @swagger
@@ -344,6 +350,6 @@ router.delete("/:id", deleteProduct);
  *                   type: string
  *                   example: "Internal Server Error"
  */
-router.put("/:id", updateProduct);
+router.put("/:id", authorization, updateProduct);
 
 export default router;

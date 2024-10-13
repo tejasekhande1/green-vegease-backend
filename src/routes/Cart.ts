@@ -13,6 +13,7 @@ import {
     clearCart,
     getCartTotal,
 } from "../controllers/Cart";
+import { authorization } from "../library/authorization";
 
 const router = express.Router();
 
@@ -22,7 +23,7 @@ const router = express.Router();
  *   get:
  *     summary: Retrieve cart
  *     description: Retrieve the cart for a user by their UUID.
- *     tags: 
+ *     tags:
  *       - Cart
  *     parameters:
  *       - name: userId
@@ -131,6 +132,7 @@ const router = express.Router();
  */
 router.get(
     "/:userId",
+    authorization,
     ValidateZod(ParamsSchemas.cart.retrieveCart, "params"),
     ValidateZod(RequestSchemas.cart.retrieveCart),
     asyncErrorHandler(retrieveCart),
@@ -142,7 +144,7 @@ router.get(
  *   post:
  *     summary: Add item to cart
  *     description: Add a new item to the cart by providing the product ID and quantity.
- *     tags: 
+ *     tags:
  *       - Cart
  *     parameters:
  *       - name: cartId
@@ -244,6 +246,7 @@ router.get(
  */
 router.post(
     "/:cartId/items",
+    authorization,
     ValidateZod(ParamsSchemas.cart.addCartItem, "params"),
     ValidateZod(RequestSchemas.cart.addCartItem),
     asyncErrorHandler(addCartItem),
@@ -255,7 +258,7 @@ router.post(
  *   put:
  *     summary: Update cart item
  *     description: Update the quantity of an item in the cart by its ID.
- *     tags: 
+ *     tags:
  *       - Cart
  *     parameters:
  *       - name: cartId
@@ -354,6 +357,7 @@ router.post(
  */
 router.put(
     "/:cartId/items/:itemId",
+    authorization,
     ValidateZod(ParamsSchemas.cart.updateCartItem, "params"),
     ValidateZod(RequestSchemas.cart.updateCartItem),
     asyncErrorHandler(updateCartItem),
@@ -365,7 +369,7 @@ router.put(
  *   delete:
  *     summary: Delete item from cart
  *     description: Remove an item from the cart by its item ID.
- *     tags: 
+ *     tags:
  *       - Cart
  *     parameters:
  *       - name: cartId
@@ -431,6 +435,7 @@ router.put(
  */
 router.delete(
     "/:cartId/items/:itemId",
+    authorization,
     ValidateZod(ParamsSchemas.cart.deleteCartItem, "params"),
     ValidateZod(RequestSchemas.cart.deleteCartItem),
     asyncErrorHandler(deleteCartItem),
@@ -442,7 +447,7 @@ router.delete(
  *   delete:
  *     summary: Clear cart
  *     description: Remove all items from the cart by its cart ID.
- *     tags: 
+ *     tags:
  *       - Cart
  *     parameters:
  *       - name: cartId
@@ -501,6 +506,7 @@ router.delete(
  */
 router.delete(
     "/:cartId",
+    authorization,
     ValidateZod(ParamsSchemas.cart.clearCart, "params"),
     ValidateZod(RequestSchemas.cart.clearCart),
     asyncErrorHandler(clearCart),
@@ -512,7 +518,7 @@ router.delete(
  *   get:
  *     summary: Get cart total
  *     description: Retrieve the total price of all items in the cart by its cart ID.
- *     tags: 
+ *     tags:
  *       - Cart
  *     parameters:
  *       - name: cartId
@@ -579,6 +585,7 @@ router.delete(
  */
 router.get(
     "/:cartId/total",
+    authorization,
     ValidateZod(ParamsSchemas.cart.getCartTotal, "params"),
     ValidateZod(RequestSchemas.cart.getCartTotal),
     asyncErrorHandler(getCartTotal),

@@ -1,5 +1,6 @@
 import express from "express";
 import { getUsers } from "../controllers/User";
+import { authorization } from "../library/authorization";
 
 const router = express.Router();
 
@@ -70,6 +71,6 @@ const router = express.Router();
  *     security:
  *       - bearerAuth: []
  */
-router.get("/", getUsers);
+router.get("/", authorization, getUsers);
 
 export default router;
