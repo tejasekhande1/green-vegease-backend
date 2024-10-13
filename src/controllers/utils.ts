@@ -37,8 +37,9 @@ export const errorResponse = (
     res: Response,
     message = "Error",
     error: any = null,
+    statusCode: 400 | 401 | 403 | 404 | 500 = 500,
 ) => {
-    return res.status(500).json({
+    return res.status(statusCode).json({
         success: false,
         message,
         error,
