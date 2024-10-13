@@ -4,6 +4,7 @@ import { Request, Response, NextFunction } from "express";
 import { errorResponse } from "../controllers/utils";
 import { IRequestWithLocal } from "./types";
 import { UserRoleEnum } from "../schema";
+import Logging from "./Logging";
 
 export interface ITokenPayload {
     id: string;
@@ -34,7 +35,9 @@ export const authorization = (
 
     try {
         const user = verifyAuthToken(token);
-        (req as IRequestWithLocal).local.user = user;
+        (req as IRequestWithLocal).local = {
+            user
+        };
         next();
     } catch (error) {
         return errorResponse(
