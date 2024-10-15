@@ -96,7 +96,7 @@ export const signUp = async (
 
             (req as IRequestWithLocal).local = {};
             (req as IRequestWithLocal).local.user = user[0];
-        
+
             next();
         }
     } catch (error) {
@@ -154,7 +154,12 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
 
         const token = generateAuthToken(payload);
 
-        return successResponse(res, { token }, 200, "User logged in successfully");
+        return successResponse(
+            res,
+            { token },
+            200,
+            "User logged in successfully",
+        );
     } catch (error) {
         return res.status(500).json({
             success: false,
@@ -165,33 +170,21 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
 };
 
 export const resetPassword = async (req: Request, res: Response) => {
-    const { email, oldPassword, newPassword, confirmedNewPassword } = req.body;
+    const { mobileNumber, newPassword, confirmedNewPassword } = req.body;
 
     try {
         const [user] = await db
             .select({
-                email: userTable.email,
-                password: userTable.password,
+                id: userTable.id,
             })
             .from(userTable)
-            .where(eq(userTable.email, email))
+            .where(eq(userTable.mobileNumber, mobileNumber))
             .limit(1);
 
         if (!user) {
             return res.status(404).json({
                 success: false,
                 message: "User not found.",
-            });
-        }
-
-        const isOldPasswordMatched = await bcrypt.compare(
-            oldPassword,
-            user.password,
-        );
-        if (!isOldPasswordMatched) {
-            return res.status(401).json({
-                success: false,
-                message: "Please enter correct old password.",
             });
         }
 
@@ -207,7 +200,7 @@ export const resetPassword = async (req: Request, res: Response) => {
         await db
             .update(userTable)
             .set({ password: hashedNewPassword })
-            .where(eq(userTable.email, email));
+            .where(eq(userTable.id, user.id));
     } catch (error) {
         console.error("Error resetting password:", error);
         return res.status(500).json({

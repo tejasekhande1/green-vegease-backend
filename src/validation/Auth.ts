@@ -36,15 +36,9 @@ export const AuthRequestSchemas = {
         password: z.string({ required_error: "password is required" }),
     }),
     resetPassword: z.object({
-        email: z
-            .string({
-                required_error: "email is required.",
-                invalid_type_error: "email must be a string.",
-            })
-            .email("Invalid email format."),
-        oldPassword: z.string({
-            required_error: "oldPassword is required.",
-            invalid_type_error: "oldPassword must be a string.",
+        mobileNumber: z.number({
+            required_error: "mobileNumber is required.",
+            invalid_type_error: "mobileNumber must be a integer.",
         }),
         newPassword: z.string({
             required_error: "newPassword is required.",
