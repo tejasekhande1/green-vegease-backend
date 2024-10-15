@@ -111,18 +111,13 @@ router.post("/login", ValidateZod(RequestSchemas.auth.login), login);
  *           schema:
  *             type: object
  *             required:
- *               - email
- *               - oldPassword
+ *               - mobileNumber
  *               - newPassword
  *               - confirmedNewPassword
  *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 description: The user's email address
- *               oldPassword:
- *                 type: string
- *                 description: The user's current password
+ *               mobileNumber:
+ *                 type: integer
+ *                 description: The user's mobile number
  *               newPassword:
  *                 type: string
  *                 description: The new password the user wants to set
@@ -156,19 +151,7 @@ router.post("/login", ValidateZod(RequestSchemas.auth.login), login);
  *                 message:
  *                   type: string
  *                   example: "New password and confirmed password do not match."
- *       401:
- *         description: Unauthorized - Incorrect old password
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: "Please enter correct old password."
+ *       
  *       404:
  *         description: Not Found - User not found
  *         content:
