@@ -22,5 +22,7 @@ COPY . .
 # Expose the port the app runs on
 EXPOSE 8000
 
+ENTRYPOINT [ "./entrypoint.sh" ]
+
 # Command to run the application in development mode
 CMD ["npm", "run", "dev"]
