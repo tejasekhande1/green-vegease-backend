@@ -146,17 +146,28 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
             });
         }
 
-        const payload = {
+        const user = {
             id: filteredUsers[0].id,
             email: filteredUsers[0].email,
+            username: filteredUsers[0].username,
+            firstName: filteredUsers[0].firstName,
+            lastName: filteredUsers[0].lastName,
+            mobileNumber: filteredUsers[0].mobileNumber,
             role: filteredUsers[0].role as UserRoleEnum | null,
+            profilePicture: filteredUsers[0].profilePicture,
+        };
+
+        const payload = {
+            id: user.id,
+            email: user.email,
+            role: user.role,
         };
 
         const token = generateAuthToken(payload);
 
         return successResponse(
             res,
-            { token },
+            { token, user },
             200,
             "User logged in successfully",
         );
