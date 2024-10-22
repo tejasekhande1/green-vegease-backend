@@ -37,3 +37,15 @@ export const addOffer = async (
         return errorResponse(res, "Failed to add offer.", error, 500);
     }
 };
+
+export const getOffers = async (
+    req: Request,
+    res: Response,
+): Promise<Response> => {
+    try {
+        const offers = await db.select().from(offerTable);
+        return successResponse(res, offers, 200, "Offers fetched successfully");
+    } catch (error) {
+        return errorResponse(res, "Failed to fetch offers", error, 500);
+    }
+};
