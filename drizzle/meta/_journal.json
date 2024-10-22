@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1729183464783,
-      "tag": "0000_dizzy_wither",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1729613543366,
-      "tag": "0001_daffy_red_ghost",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1729613994384,
-      "tag": "0002_spicy_ben_grimm",
+      "when": 1729615877976,
+      "tag": "0000_green_the_hunter",
       "breakpoints": true
     }
   ]
