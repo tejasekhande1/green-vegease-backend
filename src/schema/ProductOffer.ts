@@ -4,8 +4,12 @@ import { offerTable } from "./Offer";
 
 export const productOfferTable = pgTable("product_offer", {
     id: uuid("id").primaryKey().defaultRandom(),
-    productId: uuid("product_id").references(() => productTable.id),
-    offerId: uuid("offer_id").references(() => offerTable.id),
+    productId: uuid("product_id")
+        .notNull()
+        .references(() => productTable.id),
+    offerId: uuid("offer_id")
+        .notNull()
+        .references(() => offerTable.id),
 });
 
 export type InsertProductOffer = typeof productOfferTable.$inferInsert;

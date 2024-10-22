@@ -16,13 +16,13 @@ export const discountTypeEnum = pgEnum("discount_type", ["percentage", "flat"]);
 
 export const offerTable = pgTable("offer", {
     id: uuid("id").primaryKey().defaultRandom(),
-    name: varchar("product_name", { length: 255 }).notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
     discountType: discountTypeEnum("discount_type").default(
-        DiscountTypeEnum.FLAT,
+        DiscountTypeEnum.PERCENTAGE,
     ),
-    discountValue: integer("discount_value"),
-    startDate: timestamp("started_at", { mode: "date" }),
-    endDate: timestamp("ended_at", { mode: "date" }),
+    discountValue: integer("discount_value").notNull(),
+    startDate: timestamp("started_at", { mode: "date" }).notNull(),
+    endDate: timestamp("ended_at", { mode: "date" }).notNull(),
 });
 
 export type InsertOffer = typeof offerTable.$inferInsert;
