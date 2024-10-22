@@ -3,6 +3,8 @@ import { userTable } from '././Auth';
 import { cartTable, cartItemTable } from './Cart';
 import { productTable } from './Product';
 import { categoryTable } from './Category';
+import { productOfferTable } from './ProductOffer';
+import { offerTable } from './Offer';
 
 export const userRelations = relations(userTable, ({ one }) => ({
     cart: one(cartTable, {
@@ -40,3 +42,14 @@ export const cartItemRelations = relations(cartItemTable, ({ one, many }) => ({
         references: [productTable.id],
     }),
 }));
+
+export const productOfferRelations = relations(
+    productOfferTable,
+    ({ one, many }) => ({
+        offer: one(offerTable, {
+            fields: [productOfferTable.offerId],
+            references: [offerTable.id],
+        }),
+        product: many(productTable),
+    }),
+);
