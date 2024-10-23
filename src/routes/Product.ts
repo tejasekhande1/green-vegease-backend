@@ -1,12 +1,14 @@
 import express from "express";
 import {
     addProduct,
+    addProductsToOffer,
     deleteProduct,
+    deleteProductFromOffer,
     getProducts,
     updateProduct,
 } from "../controllers/Product";
 import { RequestSchemas, ValidateZod } from "../validation/utils";
-import { authorization } from "../library/authorization";
+import { authorization, isAdmin } from "../library/authorization";
 const router = express.Router();
 
 /**
@@ -352,4 +354,12 @@ router.delete("/:id", authorization, deleteProduct);
  */
 router.put("/:id", authorization, updateProduct);
 
+router.post("/offer", authorization, isAdmin, addProductsToOffer);
+
+router.delete(
+    "/:offerId/:productId",
+    authorization,
+    isAdmin,
+    deleteProductFromOffer,
+);
 export default router;
