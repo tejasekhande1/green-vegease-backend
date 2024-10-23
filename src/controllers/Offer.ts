@@ -119,9 +119,7 @@ export const deleteOffer = async (
             return errorResponse(res, "Offer not found.", null, 404);
         }
 
-        await db
-            .delete(offerTable)
-            .where(eq(offerTable.id, id));
+        await db.delete(offerTable).where(eq(offerTable.id, id));
 
         return successResponse(res, null, 200, "Offer deleted successfully");
     } catch (error) {
@@ -146,7 +144,12 @@ export const getOfferById = async (
             return errorResponse(res, "Offer not found.", null, 404);
         }
 
-        return successResponse(res, offer[0], 200, "Offer retrieved successfully");
+        return successResponse(
+            res,
+            offer[0],
+            200,
+            "Offer retrieved successfully",
+        );
     } catch (error) {
         return errorResponse(res, "Failed to retrieve offer.", error, 500);
     }
@@ -154,7 +157,7 @@ export const getOfferById = async (
 
 export const getProductsByOfferId = async (
     req: Request,
-    res: Response
+    res: Response,
 ): Promise<Response> => {
     const { offerId } = req.params;
 
@@ -178,15 +181,15 @@ export const getProductsByOfferId = async (
             .from(productOfferTable)
             .leftJoin(
                 productTable,
-                eq(productOfferTable.productId, productTable.id)
+                eq(productOfferTable.productId, productTable.id),
             )
             .where(eq(productOfferTable.offerId, offerId));
 
-            const offerDetails = {
-                offerId: offerId,
-                offerName: offer[0].name,
-                products: productsWithOffer,
-            };
+        const offerDetails = {
+            offerId: offerId,
+            offerName: offer[0].name,
+            products: productsWithOffer,
+        };
 
         if (productsWithOffer.length === 0) {
             return successResponse(
@@ -201,14 +204,14 @@ export const getProductsByOfferId = async (
             res,
             offerDetails,
             200,
-            "Offer with its associated products retrieved successfully"
+            "Offer with its associated products retrieved successfully",
         );
     } catch (error) {
         return errorResponse(
             res,
             "An error occurred while retrieving the offer with products",
             error,
-            500
+            500,
         );
     }
 };
