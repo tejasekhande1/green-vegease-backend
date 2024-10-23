@@ -6,6 +6,7 @@ import {
     updateOffer,
     deleteOffer,
     getOfferById,
+    getProductsByOfferId,
 } from "../controllers/Offer";
 const router = express.Router();
 
@@ -19,4 +20,5 @@ router.delete("/:id", authorization, isAdmin, deleteOffer);
 
 router.get("/:id", authorization, getOfferById);
 
+router.get("/:offerId/products", authorization, getProductsByOfferId);
 export default router;

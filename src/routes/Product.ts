@@ -5,6 +5,7 @@ import {
     deleteProduct,
     deleteProductFromOffer,
     getProducts,
+    getProductsWithOffers,
     updateProduct,
 } from "../controllers/Product";
 import { RequestSchemas, ValidateZod } from "../validation/utils";
@@ -362,4 +363,6 @@ router.delete(
     isAdmin,
     deleteProductFromOffer,
 );
+
+router.get("/products-with-offers", authorization, getProductsWithOffers);
 export default router;

@@ -305,3 +305,59 @@ export const deleteProductFromOffer = async (
         );
     }
 };
+
+export const getProductsWithOffers = async (
+    req: Request,
+    res: Response
+): Promise<Response> => {
+    try {
+        const offersWithProducts = await db
+            .select({
+                offerId: offerTable.id,
+                offerName: offerTable.name,
+                productId: productTable.id,
+                productName: productTable.name,
+                productDescription: productTable.description,
+            })
+            .from(offerTable)
+            .leftJoin(
+                productOfferTable,
+                eq(offerTable.id, productOfferTable.offerId)
+            )
+            .leftJoin(
+                productTable,
+                eq(productOfferTable.productId, productTable.id)
+            );
+
+        const groupedOffers: { [key: string]: any[] } = {};
+        offersWithProducts.forEach((row) => {
+            const { offerName, productId, productName, productDescription } = row;
+
+            if (!groupedOffers[offerName]) {
+                groupedOffers[offerName] = [];
+            }
+
+            if (productId) {
+                groupedOffers[offerName].push({
+                    productId,
+                    productName,
+                    productDescription,
+                });
+            }
+        });
+
+        return successResponse(
+            res,
+            groupedOffers,
+            200,
+            "Offers with their associated products retrieved successfully"
+        );
+    } catch (error) {
+        return errorResponse(
+            res,
+            "An error occurred while retrieving products with offers",
+            error,
+            500
+        );
+    }
+};

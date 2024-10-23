@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import db from "../config/database";
 import { offerTable } from "../schema/Offer";
+import { productTable } from "../schema";
+import { productOfferTable } from "../schema/ProductOffer";
 import { eq } from "drizzle-orm";
 import { errorResponse, successResponse } from "./utils";
 
@@ -147,5 +149,66 @@ export const getOfferById = async (
         return successResponse(res, offer[0], 200, "Offer retrieved successfully");
     } catch (error) {
         return errorResponse(res, "Failed to retrieve offer.", error, 500);
+    }
+};
+
+export const getProductsByOfferId = async (
+    req: Request,
+    res: Response
+): Promise<Response> => {
+    const { offerId } = req.params;
+
+    try {
+        const offer = await db
+            .select()
+            .from(offerTable)
+            .where(eq(offerTable.id, offerId))
+            .limit(1);
+
+        if (offer.length === 0) {
+            return errorResponse(res, "This offer does not exist", null, 404);
+        }
+
+        const productsWithOffer = await db
+            .select({
+                productId: productTable.id,
+                productName: productTable.name,
+                productDescription: productTable.description,
+            })
+            .from(productOfferTable)
+            .leftJoin(
+                productTable,
+                eq(productOfferTable.productId, productTable.id)
+            )
+            .where(eq(productOfferTable.offerId, offerId));
+
+            const offerDetails = {
+                offerId: offerId,
+                offerName: offer[0].name,
+                products: productsWithOffer,
+            };
+
+        if (productsWithOffer.length === 0) {
+            return successResponse(
+                res,
+                offerDetails,
+                200,
+                "No products found for this offer",
+            );
+        }
+
+        return successResponse(
+            res,
+            offerDetails,
+            200,
+            "Offer with its associated products retrieved successfully"
+        );
+    } catch (error) {
+        return errorResponse(
+            res,
+            "An error occurred while retrieving the offer with products",
+            error,
+            500
+        );
     }
 };
