@@ -5,7 +5,10 @@ import { productTable } from "../schema/Product";
 import { insertProduct } from "../schema/utils";
 import db from "../config/database";
 import { categoryTable } from "../schema/Category";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
+import { errorResponse, successResponse } from "./utils";
+import { offerTable } from "../schema/Offer";
+import { productOfferTable } from "../schema/ProductOffer";
 
 export const addProduct = async (
     req: Request,
@@ -206,5 +209,155 @@ export const updateProduct = async (
                     ? error.message
                     : "Internal Server Error",
         });
+    }
+};
+
+export const addProductsToOffer = async (
+    req: Request,
+    res: Response,
+): Promise<Response> => {
+    const { offerId, products } = req.body;
+    try {
+        const existingOffers = await db
+            .select()
+            .from(offerTable)
+            .where(eq(offerTable.id, offerId))
+            .limit(1);
+
+        if (existingOffers.length === 0) {
+            return errorResponse(res, "This offer does not exist", null, 404);
+        }
+
+        const offerProductEntries = products.map((productId: number) => ({
+            offerId: offerId,
+            productId: productId,
+        }));
+
+        const addProductsInOffer = await db
+            .insert(productOfferTable)
+            .values(offerProductEntries)
+            .returning();
+
+        return successResponse(
+            res,
+            addProductsInOffer,
+            201,
+            "Products added to the offer successfully",
+        );
+    } catch (error) {
+        return errorResponse(
+            res,
+            "An error occurred while adding products to the offer",
+            error,
+            500,
+        );
+    }
+};
+
+export const deleteProductFromOffer = async (
+    req: Request,
+    res: Response,
+): Promise<Response> => {
+    const { offerId, productId } = req.params;
+
+    try {
+        const existingOffers = await db
+            .select()
+            .from(offerTable)
+            .where(eq(offerTable.id, offerId))
+            .limit(1);
+
+        if (existingOffers.length === 0) {
+            return errorResponse(res, "This offer does not exist", null, 404);
+        }
+
+        const deleteProduct = await db
+            .delete(productOfferTable)
+            .where(
+                and(
+                    eq(productOfferTable.offerId, offerId),
+                    eq(productOfferTable.productId, productId),
+                ),
+            )
+            .returning();
+
+        if (deleteProduct.length === 0) {
+            return errorResponse(
+                res,
+                "This product was not found in the specified offer",
+                null,
+                404,
+            );
+        }
+
+        return successResponse(
+            res,
+            deleteProduct,
+            200,
+            "Product deleted from the offer successfully",
+        );
+    } catch (error) {
+        return errorResponse(
+            res,
+            "An error occurred while deleting the product from the offer",
+            error,
+            500,
+        );
+    }
+};
+
+export const getProductsWithOffers = async (
+    req: Request,
+    res: Response
+): Promise<Response> => {
+    try {
+        const offersWithProducts = await db
+            .select({
+                offerId: offerTable.id,
+                offerName: offerTable.name,
+                productId: productTable.id,
+                productName: productTable.name,
+                productDescription: productTable.description,
+            })
+            .from(offerTable)
+            .leftJoin(
+                productOfferTable,
+                eq(offerTable.id, productOfferTable.offerId)
+            )
+            .leftJoin(
+                productTable,
+                eq(productOfferTable.productId, productTable.id)
+            );
+
+        const groupedOffers: { [key: string]: any[] } = {};
+        offersWithProducts.forEach((row) => {
+            const { offerName, productId, productName, productDescription } = row;
+
+            if (!groupedOffers[offerName]) {
+                groupedOffers[offerName] = [];
+            }
+
+            if (productId) {
+                groupedOffers[offerName].push({
+                    productId,
+                    productName,
+                    productDescription,
+                });
+            }
+        });
+
+        return successResponse(
+            res,
+            groupedOffers,
+            200,
+            "Offers with their associated products retrieved successfully"
+        );
+    } catch (error) {
+        return errorResponse(
+            res,
+            "An error occurred while retrieving products with offers",
+            error,
+            500
+        );
     }
 };

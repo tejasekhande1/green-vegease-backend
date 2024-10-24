@@ -11,6 +11,7 @@ import productRoutes from "./routes/Product";
 import cartRoutes from "./routes/Cart";
 import adminRoutes from "./routes/Admin";
 import userRoutes from "./routes/User";
+import offerRoutes from "./routes/Offer";
 import swaggerSpec from "./config/swagger";
 import Logging from "./library/Logging";
 import { config } from "./config/config";
@@ -81,6 +82,7 @@ const startServer = () => {
     app.use("/api/v1/cart", cartRoutes);
     app.use("/api/v1/admin", adminRoutes);
     app.use("/api/v1/user", userRoutes);
+    app.use("/api/v1/offer",offerRoutes);
 
     // health-check
     app.get("/ping", (req: Request, res: Response, next: NextFunction) =>

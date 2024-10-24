@@ -1,8 +1,10 @@
-import { relations } from 'drizzle-orm';
-import { userTable } from '././Auth';
-import { cartTable, cartItemTable } from './Cart';
-import { productTable } from './Product';
-import { categoryTable } from './Category';
+import { relations } from "drizzle-orm";
+import { userTable } from "././Auth";
+import { cartTable, cartItemTable } from "./Cart";
+import { productTable } from "./Product";
+import { categoryTable } from "./Category";
+import { productOfferTable } from "./ProductOffer";
+import { offerTable } from "./Offer";
 
 export const userRelations = relations(userTable, ({ one }) => ({
     cart: one(cartTable, {
@@ -11,11 +13,12 @@ export const userRelations = relations(userTable, ({ one }) => ({
     }),
 }));
 
-export const productRelations = relations(productTable, ({ one }) => ({
+export const productRelations = relations(productTable, ({ one, many }) => ({
     category: one(categoryTable, {
         fields: [productTable.categoryId],
         references: [categoryTable.id],
     }),
+    productOffers: many(productOfferTable),
 }));
 
 export const categoryRelations = relations(categoryTable, ({ many }) => ({
@@ -40,3 +43,21 @@ export const cartItemRelations = relations(cartItemTable, ({ one, many }) => ({
         references: [productTable.id],
     }),
 }));
+
+export const offerRelations = relations(offerTable, ({ many }) => ({
+    productOffers: many(productOfferTable),
+}));
+
+export const productOfferRelations = relations(
+    productOfferTable,
+    ({ one }) => ({
+        product: one(productTable, {
+            fields: [productOfferTable.productId],
+            references: [productTable.id],
+        }),
+        offer: one(offerTable, {
+            fields: [productOfferTable.offerId],
+            references: [offerTable.id],
+        }),
+    }),
+);

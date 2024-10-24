@@ -7,6 +7,7 @@ import { cartItemTable, cartTable } from "../schema/Cart";
 import { productTable } from "../schema/Product";
 import { IRequestWithLocal } from "../library/types";
 import Logging from "../library/Logging";
+import { offerTable } from "../schema/Offer";
 
 type ControllerFunction = (
     req: Request,
@@ -133,6 +134,25 @@ export const isCartProductExists = async (
             .limit(1);
 
         if (cartItem.length === 0) {
+            return false;
+        }
+
+        return true;
+    } catch (error) {
+        Logging.error(error);
+        return false;
+    }
+};
+
+export const isOfferExists = async (offerName: string): Promise<boolean> => {
+    try {
+        const offer = await db
+            .select({ offerId: offerTable.id })
+            .from(offerTable)
+            .where(eq(offerTable.name, offerName))
+            .limit(1);
+
+        if (offer.length === 0) {
             return false;
         }
 

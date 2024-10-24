@@ -1,12 +1,15 @@
 import express from "express";
 import {
     addProduct,
+    addProductsToOffer,
     deleteProduct,
+    deleteProductFromOffer,
     getProducts,
+    getProductsWithOffers,
     updateProduct,
 } from "../controllers/Product";
 import { RequestSchemas, ValidateZod } from "../validation/utils";
-import { authorization } from "../library/authorization";
+import { authorization, isAdmin } from "../library/authorization";
 const router = express.Router();
 
 /**
@@ -351,5 +354,204 @@ router.delete("/:id", authorization, deleteProduct);
  *                   example: "Internal Server Error"
  */
 router.put("/:id", authorization, updateProduct);
+
+/**
+ * @swagger
+ * /api/v1/product/offer:
+ *   post:
+ *     summary: Add products to an existing offer
+ *     description: Links an array of product IDs to a specified offer by its ID.
+ *     tags: [Offer]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               offerId:
+ *                 type: string
+ *                 description: The ID of the offer to which products will be added.
+ *                 example: "offer123"
+ *               products:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   description: An array of product IDs to add to the offer.
+ *                   example: ["product1", "product2", "product3"]
+ *     responses:
+ *       201:
+ *         description: Products added to the offer successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Products added to the offer successfully"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                         example: "entry123"
+ *                       offerId:
+ *                         type: string
+ *                         example: "offer123"
+ *                       productId:
+ *                         type: string
+ *                         example: "product1"
+ *       404:
+ *         description: This offer does not exist
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "This offer does not exist"
+ *       500:
+ *         description: An error occurred while adding products to the offer
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "An error occurred while adding products to the offer"
+ *                 error:
+ *                   type: string
+ */
+router.post("/offer", authorization, isAdmin, addProductsToOffer);
+
+/**
+ * @swagger
+ * /offers/{offerId}/{productId}:
+ *   delete:
+ *     summary: Delete a product from an offer
+ *     description: Deletes a specified product from a specific offer by its IDs.
+ *     tags: [Offer]
+ *     parameters:
+ *       - in: path
+ *         name: offerId
+ *         required: true
+ *         description: The ID of the offer to delete the product from.
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         description: The ID of the product to be deleted from the offer.
+ *         schema:
+ *           type: string
+ *     security:
+ *       - BearerAuth: []  # Assuming you have JWT authentication
+ *     responses:
+ *       200:
+ *         description: Product deleted from the offer successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Product deleted from the offer successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     offerId:
+ *                       type: string
+ *                     productId:
+ *                       type: string
+ *       404:
+ *         description: Offer does not exist or product was not found in the specified offer.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: This offer does not exist
+ *       500:
+ *         description: An error occurred while deleting the product from the offer.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: An error occurred while deleting the product from the offer
+ */
+router.delete(
+    "/:offerId/:productId",
+    authorization,
+    isAdmin,
+    deleteProductFromOffer,
+);
+
+/**
+ * @swagger
+ * /products-with-offers:
+ *   get:
+ *     summary: Get products with associated offers
+ *     description: Retrieves a list of offers along with their associated products.
+ *     tags: [Offer]
+ *     security:
+ *       - BearerAuth: []  # Assuming you have JWT authentication
+ *     responses:
+ *       200:
+ *         description: Offers with their associated products retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Offers with their associated products retrieved successfully
+ *                 data:
+ *                   type: object
+ *                   additionalProperties:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         productId:
+ *                           type: string
+ *                         productName:
+ *                           type: string
+ *                         productDescription:
+ *                           type: string
+ *       500:
+ *         description: An error occurred while retrieving products with offers.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: An error occurred while retrieving products with offers
+ */
+router.get("/products-with-offers", authorization, getProductsWithOffers);
 
 export default router;
