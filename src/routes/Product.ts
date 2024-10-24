@@ -380,7 +380,7 @@ router.put("/:id", authorization, updateProduct);
  *                 items:
  *                   type: string
  *                   description: An array of product IDs to add to the offer.
- *                   example: ["product1", "product2", "product3"]
+ *                   example: ["product1ID", "product2ID", "product3ID"]
  *     responses:
  *       201:
  *         description: Products added to the offer successfully

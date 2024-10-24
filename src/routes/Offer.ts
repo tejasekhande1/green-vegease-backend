@@ -495,7 +495,7 @@ router.get("/:id", authorization, getOfferById);
  *                       productId:
  *                         type: string
  *                         description: ID of the product.
- *                         example: "a12b3c4d-567e-89fg-012h-34i567jklmn8"
+ *                         example: "a12b3c4d-567e-89fg-012h-34i567jilin8"
  *                       productName:
  *                         type: string
  *                         description: Name of the product.
