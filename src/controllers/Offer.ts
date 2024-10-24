@@ -4,7 +4,8 @@ import { offerTable } from "../schema/Offer";
 import { productTable } from "../schema";
 import { productOfferTable } from "../schema/ProductOffer";
 import { eq } from "drizzle-orm";
-import { errorResponse, successResponse } from "./utils";
+import { calculateOfferPrice, errorResponse, successResponse } from "./utils";
+import { ProductsWithOffer } from "../library/types";
 
 export const addOffer = async (
     req: Request,
@@ -162,13 +163,12 @@ export const getProductsByOfferId = async (
     const { offerId } = req.params;
 
     try {
-        const offer = await db
+        const [offer] = await db
             .select()
             .from(offerTable)
-            .where(eq(offerTable.id, offerId))
-            .limit(1);
+            .where(eq(offerTable.id, offerId));
 
-        if (offer.length === 0) {
+        if (!offer) {
             return errorResponse(res, "This offer does not exist", null, 404);
         }
 
@@ -177,6 +177,9 @@ export const getProductsByOfferId = async (
                 productId: productTable.id,
                 productName: productTable.name,
                 productDescription: productTable.description,
+                quantity: productTable.quantityInKg,
+                price: productTable.price,
+                image: productTable.images,
             })
             .from(productOfferTable)
             .leftJoin(
@@ -185,26 +188,27 @@ export const getProductsByOfferId = async (
             )
             .where(eq(productOfferTable.offerId, offerId));
 
+        productsWithOffer.forEach((product) => {
+            (product as ProductsWithOffer)["offerValue"] = calculateOfferPrice(
+                product.price!,
+                offer.discountValue,
+                offer.discountType,
+            );
+        });
+
         const offerDetails = {
-            offerId: offerId,
-            offerName: offer[0].name,
+            offerId: offer.id,
+            offerName: offer.name,
             products: productsWithOffer,
         };
-
-        if (productsWithOffer.length === 0) {
-            return successResponse(
-                res,
-                offerDetails,
-                200,
-                "No products found for this offer",
-            );
-        }
 
         return successResponse(
             res,
             offerDetails,
             200,
-            "Offer with its associated products retrieved successfully",
+            productsWithOffer.length === 0
+                ? "No products found for this offer"
+                : "Offer with its associated products retrieved successfully",
         );
     } catch (error) {
         return errorResponse(
