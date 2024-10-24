@@ -7,7 +7,7 @@ import { cartItemTable, cartTable } from "../schema/Cart";
 import { productTable } from "../schema/Product";
 import { IRequestWithLocal } from "../library/types";
 import Logging from "../library/Logging";
-import { offerTable } from "../schema/Offer";
+import { DiscountTypeEnum, offerTable } from "../schema/Offer";
 
 type ControllerFunction = (
     req: Request,
@@ -160,5 +160,22 @@ export const isOfferExists = async (offerName: string): Promise<boolean> => {
     } catch (error) {
         Logging.error(error);
         return false;
+    }
+};
+
+export const calculateOfferPrice = (
+    actualValue: number,
+    offerValue: number,
+    offerType: string | null,
+): number => {
+    if (!offerType) return actualValue;
+
+    switch (offerType) {
+        case DiscountTypeEnum.FLAT:
+            return Math.max(0, actualValue - offerValue);
+        case DiscountTypeEnum.PERCENTAGE:
+            return actualValue - (actualValue * offerValue) / 100;
+        default:
+            return actualValue;
     }
 };

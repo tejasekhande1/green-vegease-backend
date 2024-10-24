@@ -457,86 +457,89 @@ router.get("/:id", authorization, getOfferById);
 
 /**
  * @swagger
- * /api/v1/offer/{offerId}/products:
+ * /offers/{offerId}/products:
  *   get:
- *     summary: Retrieve products associated with a specific offer
- *     description: Gets the list of products linked to a specific offer using its ID.
- *     tags: [Offer]
- *     security:
- *       - bearerAuth: []
+ *     summary: Get products associated with an offer
+ *     description: Retrieve a list of products that are associated with a given offer ID, along with their offer-specific price details.
+ *     tags:
+ *       - Offer
  *     parameters:
  *       - in: path
  *         name: offerId
  *         required: true
- *         description: The ID of the offer whose products are to be retrieved.
+ *         description: The ID of the offer to retrieve products for.
  *         schema:
  *           type: string
- *           example: "offer123"
+ *           example: "e3d4f6b7-2c59-45df-bc0c-6a92cd54de1d"
  *     responses:
  *       200:
- *         description: Offer with its associated products retrieved successfully
+ *         description: Successfully retrieved the products associated with the offer.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
+ *                 offerId:
  *                   type: string
- *                   example: "Offer with its associated products retrieved successfully"
- *                 data:
- *                   type: object
- *                   properties:
- *                     offerId:
- *                       type: string
- *                       example: "offer123"
- *                     offerName:
- *                       type: string
- *                       example: "Special Discount"
- *                     products:
- *                       type: array
- *                       items:
- *                         type: object
- *                         properties:
- *                           productId:
- *                             type: string
- *                             example: "product123"
- *                           productName:
- *                             type: string
- *                             example: "Fresh Lettuce"
- *                           productDescription:
- *                             type: string
- *                             example: "Crisp and fresh lettuce"
+ *                   description: ID of the offer.
+ *                   example: "e3d4f6b7-2c59-45df-bc0c-6a92cd54de1d"
+ *                 offerName:
+ *                   type: string
+ *                   description: Name of the offer.
+ *                   example: "Summer Sale"
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       productId:
+ *                         type: string
+ *                         description: ID of the product.
+ *                         example: "a12b3c4d-567e-89fg-012h-34i567jilin8"
+ *                       productName:
+ *                         type: string
+ *                         description: Name of the product.
+ *                         example: "Organic Fertilizer"
+ *                       productDescription:
+ *                         type: string
+ *                         description: Description of the product.
+ *                         example: "A high-quality organic fertilizer suitable for all crops."
+ *                       quantity:
+ *                         type: number
+ *                         description: Quantity of the product in kilograms.
+ *                         example: 50
+ *                       price:
+ *                         type: number
+ *                         description: Original price of the product.
+ *                         example: 100
+ *                       image:
+ *                         type: string
+ *                         description: Image URL of the product.
+ *                         example: "https://example.com/products/organic-fertilizer.png"
+ *                       offerValue:
+ *                         type: number
+ *                         description: Price after applying the offer discount.
+ *                         example: 80
  *       404:
- *         description: Offer does not exist
+ *         description: Offer not found.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
  *                 message:
  *                   type: string
  *                   example: "This offer does not exist"
  *       500:
- *         description: Failed to retrieve offer products due to server error
+ *         description: Internal server error.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
  *                 message:
  *                   type: string
  *                   example: "An error occurred while retrieving the offer with products"
- *                 error:
- *                   type: string
  */
 router.get("/:offerId/products", authorization, getProductsByOfferId);
 
